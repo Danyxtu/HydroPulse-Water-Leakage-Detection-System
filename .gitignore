@@ -1,0 +1,26 @@
+# --- Environments ---
+.env
+.env.local
+.env.*.local
+.env.development
+.env.local.development
+.env.production
+
+# --- TypeScript ---
+# Ignore the compiled JavaScript files (we only want to save the .ts source)
+/dist
+/build
+*.tsbuildinfo
+
+# --- Operating System Junk ---
+.DS_Store
+Thumbs.db
+
+# --- Expo / React Native Specific ---
+.expo/
+dist/
+web-build/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
