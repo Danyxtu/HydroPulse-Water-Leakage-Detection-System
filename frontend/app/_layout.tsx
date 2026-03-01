@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
+import { Stack } from "expo-router";
+
 const RootLayout = () => {
   return (
-    <View>
-      <Text>_layout</Text>
-    </View>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 };
 
