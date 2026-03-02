@@ -7,7 +7,7 @@ const TabLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: colors.background, marginTop: 140 },
+        sceneStyle: { backgroundColor: colors.background, marginTop: 150 },
       }}
     >
       <Tabs.Screen name="dashboard" options={{ headerShown: false }} />
