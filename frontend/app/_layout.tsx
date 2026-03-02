@@ -1,10 +1,17 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { Stack } from "expo-router";
+import Header from "@/components/Header";
+import { colors } from "@/constants";
 
 const RootLayout = () => {
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{
+        header: () => <Header />,
+        contentStyle: { backgroundColor: colors.background || "red" },
+      }}
+    >
+      <Stack.Screen name="(tabs)" />
     </Stack>
   );
 };

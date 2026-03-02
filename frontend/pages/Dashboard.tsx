@@ -1,7 +1,9 @@
-import { Text, View, TouchableOpacity } from "react-native";
+import { View } from "react-native";
+
+// Styles
 import { dashboardStyles } from "@/styles/dashboard.css";
-import Feather from "@expo/vector-icons/Feather";
-import Spacer from "@/components/Spacer";
+
+// Components
 import { SensorCard } from "@/components/Dashboard";
 
 const sensorData = [
@@ -25,30 +27,11 @@ const sensorData = [
 const Dashboard = () => {
   return (
     <View style={dashboardStyles.background}>
-      {/* Header */}
-      <View style={dashboardStyles.shadowWrapper}>
-        <View style={dashboardStyles.header}>
-          <View>
-            <View style={dashboardStyles.pictureHolder}></View>
-          </View>
-          <View style={dashboardStyles.middlePart}>
-            <Text style={dashboardStyles.appName}>HydroPulse</Text>
-            <Text style={dashboardStyles.appDescription}>
-              Water Leakage Detection System
-            </Text>
-          </View>
-          <View>
-            <TouchableOpacity style={dashboardStyles.chevronButton}>
-              <Feather name="chevrons-down" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
       {/* Body */}
-      <Spacer height={12} />
       <View style={dashboardStyles.body}>
+        {/* Sensor Cards */}
         {sensorData.map((sensor, index) => (
-          <View key={index} style={{ marginBottom: 6 }}>
+          <View key={index}>
             <SensorCard
               sensorName={sensor.sensorName}
               timeUsage={sensor.timeUsage}
@@ -56,6 +39,7 @@ const Dashboard = () => {
             />
           </View>
         ))}
+        {/* Today's Current Usage */}
       </View>
     </View>
   );
