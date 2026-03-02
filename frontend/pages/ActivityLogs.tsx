@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import React from "react";
 
 const ActivityLogs = () => {
@@ -10,5 +10,3 @@ const ActivityLogs = () => {
 };
 
 export default ActivityLogs;
-
-const styles = StyleSheet.create({});
