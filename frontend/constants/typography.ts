@@ -1,4 +1,5 @@
 export const fontSize = {
+  label: 24,
   title: 20,
   subtitle: 12,
   body: 14,

@@ -5,8 +5,7 @@ import { dashboardStyles } from "@/styles/dashboard.css";
 
 // Components
 import { SensorCard } from "@/components/Dashboard";
-
-
+import UsageCard from "@/components/Dashboard/UsageCard";
 
 const Dashboard = () => {
   return (
@@ -23,7 +22,9 @@ const Dashboard = () => {
             />
           </View>
         ))}
+
         {/* Today's Current Usage */}
+        <UsageCard />
       </View>
     </View>
   );
