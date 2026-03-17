@@ -1,12 +1,20 @@
-import { StyleSheet, Text, View } from "react-native";
-const RootLayout = () => {
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { mqttService } from "../services/mqttService";
+
+export default function RootLayout() {
+  useEffect(() => {
+    // Start MQTT connection on app launch
+    mqttService.connect();
+  }, []);
+
   return (
-    <View>
-      <Text>_layout</Text>
-    </View>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="activity-logs" />
+      <Stack.Screen name="usage-details" />
+      <Stack.Screen name="profile-settings" />
+      <Stack.Screen name="zone-management" />
+    </Stack>
   );
-};
-
-export default RootLayout;
-
-const styles = StyleSheet.create({});
+}

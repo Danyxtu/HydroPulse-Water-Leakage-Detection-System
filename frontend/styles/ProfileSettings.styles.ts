@@ -1,0 +1,153 @@
+import { StyleSheet } from 'react-native';
+import { COLORS, SIZES } from '../constants/themes';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingHorizontal: SIZES.padding,
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: 16,
+    marginBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.textDark,
+  },
+  profileCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusMedium,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 30,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  avatarLarge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 4,
+    borderColor: COLORS.background,
+  },
+  avatarText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.white,
+  },
+  profileName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.textDark,
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: COLORS.textGray,
+    marginBottom: 20,
+  },
+  editProfileBtn: {
+    backgroundColor: COLORS.background,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+  },
+  editProfileText: {
+    color: COLORS.primary,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  sectionHeader: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.secondary,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    marginLeft: 12,
+  },
+  settingsGroup: {
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radiusMedium,
+    marginBottom: 24,
+    overflow: 'hidden',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  iconBoxDestructive: {
+    backgroundColor: COLORS.redLight,
+  },
+  settingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textDark,
+  },
+  settingSubtitle: {
+    fontSize: 12,
+    color: COLORS.textGray,
+    marginTop: 2,
+  },
+  textDestructive: {
+    color: COLORS.red,
+  },
+  settingRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  settingValue: {
+    fontSize: 14,
+    color: COLORS.textGray,
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F0F5FA',
+    marginLeft: 68,
+  },
+  versionText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: COLORS.textGray,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+});

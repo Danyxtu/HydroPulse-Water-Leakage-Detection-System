@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Zone" ADD COLUMN     "threshold" DOUBLE PRECISION NOT NULL DEFAULT 5.0;

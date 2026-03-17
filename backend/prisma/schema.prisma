@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Models ---
+
+enum ZoneStatus {
+  Leakage
+  Inactive
+  Running
+}
+
+model Zone {
+  id              String      @id @default(uuid())
+  zoneId          String      @unique // Matches the ESP32 ID (e.g., "1")
+  name            String
+  status          ZoneStatus  @default(Inactive)
+  flowRate        Float       @default(0.0)
+  totalVolume     Float       @default(0.0)
+  threshold       Float       @default(5.0)
+  lastUpdate      DateTime    @updatedAt
+  
+  logs            ActivityLog[]
+  dailyUsage      DailyUsage[]
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  zone        Zone     @relation(fields: [zoneId], references: [id])
+  zoneId      String
+  timestamp   DateTime @default(now())
+  duration    String?
+  volume      String?
+  type        String   @default("Leakage") // e.g., "Leakage", "System"
+}
+
+model DailyUsage {
+  id          String   @id @default(uuid())
+  zone        Zone     @relation(fields: [zoneId], references: [id])
+  zoneId      String
+  date        DateTime @default(now()) @db.Date
+  volume      Float    @default(0.0)
+  percentage  Float    @default(0.0)
+
+  @@unique([zoneId, date])
+}
