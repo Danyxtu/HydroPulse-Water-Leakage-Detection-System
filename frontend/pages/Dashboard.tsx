@@ -1,13 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Home, History, AlertTriangle, Activity, Minus, ChevronDown } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { PieChart } from 'react-native-gifted-charts';
-import DetectionModal from '../components/DetectionModal';
-import { styles } from '../styles/Dashboard.styles';
-import { waterService } from '../services/waterService';
-import { Zone, CurrentUsage, ZoneStatus } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Home,
+  History,
+  AlertTriangle,
+  Activity,
+  Minus,
+  ChevronDown,
+} from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { PieChart } from "react-native-gifted-charts";
+import DetectionModal from "../components/DetectionModal";
+import { styles } from "../styles/Dashboard.styles";
+import { waterService } from "../services/waterService";
+import { Zone, CurrentUsage, ZoneStatus } from "../types";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -22,7 +35,7 @@ export default function Dashboard() {
       try {
         // Ensure storage is initialized on first run
         await waterService.initializeStorage();
-        
+
         const [zonesRes, usageRes] = await Promise.all([
           waterService.getZones(),
           waterService.getCurrentUsage(),
@@ -31,7 +44,7 @@ export default function Dashboard() {
         if (zonesRes.success) setZoneData(zonesRes.data);
         if (usageRes.success) setUsageData(usageRes.data);
       } catch (error) {
-        console.error('FAILED TO FETCH DASHBOARD DATA:', error);
+        console.error("FAILED TO FETCH DASHBOARD DATA:", error);
       } finally {
         setLoading(false);
       }
@@ -40,39 +53,43 @@ export default function Dashboard() {
     fetchDashboardData();
 
     // Handle Real-time MQTT Updates
-    mqttService.connect((data) => {
-      setZoneData((prevZones) => 
-        waterService.applyLocalUpdate(data.zoneId, { 
-          status: data.status,
-          flowRate: data.flowRate,
-          totalVolume: data.totalVolume
-        }, prevZones)
-      );
-    });
+    // mqttService.connect((data) => {
+    //   setZoneData((prevZones) =>
+    //     waterService.applyLocalUpdate(
+    //       data.zoneId,
+    //       {
+    //         status: data.status,
+    //         flowRate: data.flowRate,
+    //         totalVolume: data.totalVolume,
+    //       },
+    //       prevZones,
+    //     ),
+    //   );
+    // });
   }, []);
 
   const getStatusConfig = (status: ZoneStatus) => {
     switch (status) {
-      case 'Leakage':
+      case "Leakage":
         return {
           color: styles.textRed,
           indicatorColor: styles.indicatorRed,
           icon: <AlertTriangle size={28} color="#E74C3C" />,
-          label: 'Possible Leakage'
+          label: "Possible Leakage",
         };
-      case 'Inactive':
+      case "Inactive":
         return {
           color: styles.textYellow,
           indicatorColor: styles.indicatorYellow,
           icon: <Minus size={28} color="#F1C40F" />,
-          label: 'Inactive'
+          label: "Inactive",
         };
-      case 'Running':
+      case "Running":
         return {
           color: styles.textGreen,
           indicatorColor: styles.indicatorGreen,
           icon: <Activity size={28} color="#2ECC71" />,
-          label: 'Running'
+          label: "Running",
         };
     }
   };
@@ -80,12 +97,11 @@ export default function Dashboard() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-
         {/* --- Header --- */}
-        <TouchableOpacity 
-          style={styles.header} 
+        <TouchableOpacity
+          style={styles.header}
           activeOpacity={0.9}
-          onPress={() => router.push('/profile-settings')}
+          onPress={() => router.push("/profile-settings")}
         >
           <View style={styles.headerLeft}>
             <View style={styles.avatarPlaceholder} />
@@ -98,7 +114,13 @@ export default function Dashboard() {
         </TouchableOpacity>
 
         {/* --- Loading Indicator --- */}
-        {loading && <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 40 }} />}
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color="#4A90E2"
+            style={{ marginTop: 40 }}
+          />
+        )}
 
         {/* --- Zone Cards --- */}
         {!loading && (
@@ -110,15 +132,17 @@ export default function Dashboard() {
                   <View style={styles.cardInfo}>
                     <Text style={styles.zoneName}>{zone.name}</Text>
                     <Text style={styles.timeUsage}>
-                      {zone.flowRate !== undefined && zone.flowRate > 0 
-                        ? `Flow: ${zone.flowRate.toFixed(2)} L/min` 
+                      {zone.flowRate !== undefined && zone.flowRate > 0
+                        ? `Flow: ${zone.flowRate.toFixed(2)} L/min`
                         : `Time Usage: ${zone.timeUsage}`}
                     </Text>
                   </View>
 
                   <View style={styles.statusContainer}>
                     {config.icon}
-                    <Text style={[styles.statusLabel, config.color]}>{config.label}</Text>
+                    <Text style={[styles.statusLabel, config.color]}>
+                      {config.label}
+                    </Text>
                   </View>
                   {/* Right edge color indicator */}
                   <View style={[styles.cardIndicator, config.indicatorColor]} />
@@ -132,19 +156,29 @@ export default function Dashboard() {
         <TouchableOpacity
           style={styles.analyticsCard}
           activeOpacity={0.9}
-          onPress={() => router.push('/usage-details')}
+          onPress={() => router.push("/usage-details")}
         >
           <View style={styles.analyticsInfo}>
-            <Text style={styles.analyticsTitle}>Today's{"\n"}Current{"\n"}Usage</Text>
+            <Text style={styles.analyticsTitle}>
+              Today's{"\n"}Current{"\n"}Usage
+            </Text>
             <View style={styles.analyticsStats}>
-              <Text style={styles.statsText}>Time: {usageData?.time || '00:00'}</Text>
-              <Text style={styles.statsText}>Est. Volume: {usageData?.estimatedVolume || '0.0L'}</Text>
+              <Text style={styles.statsText}>
+                Time: {usageData?.time || "00:00"}
+              </Text>
+              <Text style={styles.statsText}>
+                Est. Volume: {usageData?.estimatedVolume || "0.0L"}
+              </Text>
             </View>
           </View>
           {/* Pie Chart Area */}
           {usageData && (
             <PieChart
-              data={usageData.stats.map(s => ({ ...s, textColor: '#fff', fontSize: 10 }))}
+              data={usageData.stats.map((s) => ({
+                ...s,
+                textColor: "#fff",
+                fontSize: 10,
+              }))}
               radius={60}
               showText
               textSize={10}
@@ -161,7 +195,6 @@ export default function Dashboard() {
         >
           <Text style={styles.actionButtonText}>Start Detection</Text>
         </TouchableOpacity>
-
       </ScrollView>
 
       {/* --- Bottom Navigation --- */}
@@ -174,7 +207,7 @@ export default function Dashboard() {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/activity-logs')}
+          onPress={() => router.push("/activity-logs")}
         >
           <Text style={styles.navTextInactive}>Activity Logs</Text>
           <History size={24} color="#8E8E93" />

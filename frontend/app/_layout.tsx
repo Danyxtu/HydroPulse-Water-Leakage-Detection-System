@@ -4,7 +4,6 @@ import { mqttService } from "../services/mqttService";
 
 export default function RootLayout() {
   useEffect(() => {
-    // Start MQTT connection on app launch
     mqttService.connect();
   }, []);
 
