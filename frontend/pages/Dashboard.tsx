@@ -7,6 +7,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import DetectionModal from '../components/DetectionModal';
 import { styles } from '../styles/Dashboard.styles';
 import { waterService } from '../services/waterService';
+import { mqttService } from '../services/mqttService';
 import { Zone, CurrentUsage, ZoneStatus } from '../types';
 
 export default function Dashboard() {

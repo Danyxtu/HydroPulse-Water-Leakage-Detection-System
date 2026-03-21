@@ -2,7 +2,8 @@
  * --- Centralized API Client ---
  */
 
-const DEV_IP = '192.168.254.184';
+// Use localhost for better web support, fall back to the dev IP for physical devices if needed.
+const DEV_IP = 'localhost'; 
 const BASE_URL = `http://${DEV_IP}:3000/api`;
 
 export const apiClient = {

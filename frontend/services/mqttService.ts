@@ -14,22 +14,30 @@ if (typeof global.Buffer === 'undefined') {
 
 export const mqttService = {
   client: null as mqtt.MqttClient | null,
+  listeners: [] as ((data: MqttStatusMessage) => void)[],
 
   // Public Broker Configuration
   brokerConfig: {
-    host: 'ws://broker.hivemq.com:8000/mqtt', 
+    host: 'wss://broker.hivemq.com:8884/mqtt', 
     clientId: `HydroPulse_Dev_${Math.random().toString(16).slice(2, 8)}`,
   },
 
   /**
    * --- Initialize Connection ---
    */
-  connect: (onStatusUpdate?: (data: MqttStatusMessage) => void) => {
-    if (mqttService.client) return;
+  connect: function(onStatusUpdate?: (data: MqttStatusMessage) => void) {
+    // 1. If we have a new listener, add it to the list
+    if (onStatusUpdate) {
+      this.listeners.push(onStatusUpdate);
+      console.log(`[MQTT] Listener added. Total listeners: ${this.listeners.length}`);
+    }
+
+    // 2. If client already exists, just stop here (the listener is already registered)
+    if (this.client) return;
 
     console.log('[MQTT] Connecting to broker...');
-    const client = mqtt.connect(mqttService.brokerConfig.host, {
-      clientId: mqttService.brokerConfig.clientId,
+    const client = mqtt.connect(this.brokerConfig.host, {
+      clientId: this.brokerConfig.clientId,
     });
 
     client.on('connect', () => {
@@ -47,10 +55,8 @@ export const mqttService = {
         if (topic.startsWith('hydropulse/status/')) {
           const data: MqttStatusMessage = JSON.parse(messageStr);
           
-          // 2. Call the UI callback with clean data
-          if (onStatusUpdate) {
-            onStatusUpdate(data);
-          }
+          // 2. Notify all listeners
+          this.listeners.forEach(cb => cb(data));
         }
       } catch (e) {
         console.error('[MQTT] Parsing Error:', e);
@@ -61,16 +67,16 @@ export const mqttService = {
       console.error('[MQTT] Connection Error:', err);
     });
 
-    mqttService.client = client;
+    this.client = client;
   },
 
   /**
    * --- Send Commands to ESP32 ---
    */
-  sendCommand: (action: string, zoneId: string = '1') => {
-    if (!mqttService.client) return;
+  sendCommand: function(action: string, zoneId: string = '1') {
+    if (!this.client) return;
     
     const payload = JSON.stringify({ action, zoneId, ts: Date.now() });
-    mqttService.client.publish('hydropulse/cmd', payload);
+    this.client.publish('hydropulse/cmd', payload);
   }
 };
