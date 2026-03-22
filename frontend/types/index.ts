@@ -1,16 +1,21 @@
 // --- Zone & Status Types ---
-export type ZoneStatus = 'Leakage' | 'Inactive' | 'Running';
+export type ZoneStatus = "Leakage" | "Inactive" | "Running";
 
+// types/index.ts or types.ts
 export interface Zone {
   id: string;
-  zoneId: string;
   name: string;
-  timeUsage: string;
-  status: ZoneStatus;
-  flowRate?: number;
-  totalVolume?: number;
-  estimatedVolume?: string;
-  threshold?: number; // L/min threshold for leakage detection
+  zoneId: string;
+  zoneName: string;
+  flowRate: number;
+  totalVolume: number;
+  status: "Running" | "Inactive" | "Leakage";
+  timestamp: number;
+
+  // Optional fields
+  duration?: string;
+  startTime?: number;
+  lastUsed?: string;
 }
 
 // --- Usage Statistics ---
@@ -40,9 +45,11 @@ export interface LogEntry {
 // --- MQTT Message Types ---
 export interface MqttStatusMessage {
   zoneId: string;
+  zoneName?: string;
   flowRate: number;
   totalVolume: number;
   status: ZoneStatus;
+  timestamp?: number;
 }
 
 // --- API Responses ---
