@@ -84,23 +84,6 @@ export default function ActivityLogs() {
           )}
         </View>
       </View>
-
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push("/")}
-        >
-          <Text style={styles.navTextInactive}>Dashboard</Text>
-          <Home size={24} color="#8E8E93" />
-          <View style={styles.inactiveIndicator} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navTextActive}>Activity Logs</Text>
-          <History size={24} color="#4A90E2" />
-          <View style={styles.activeIndicator} />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }

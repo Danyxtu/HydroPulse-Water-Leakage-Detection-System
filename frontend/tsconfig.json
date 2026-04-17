@@ -14,7 +14,8 @@
       "@context/*": ["./src/context/*"],
       "@services/*": ["./src/services/*"],
       "@styles/*": ["./src/styles/*"],
-      "@constants/*": ["./src/constants/*"]
+      "@constants/*": ["./src/constants/*"],
+      "@data/*": ["./src/data/*"]
     },
     "jsx": "react-native"
   },

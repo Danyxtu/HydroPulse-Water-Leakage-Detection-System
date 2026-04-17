@@ -3,14 +3,13 @@ import { useEffect } from "react";
 import { mqttService } from "@services/mqttService";
 
 export default function RootLayout() {
-  useEffect(() => {
-    mqttService.connect();
-  }, []);
+  // useEffect(() => {
+  //   mqttService.connect();
+  // }, []);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="activity-logs" />
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="usage-details" />
       <Stack.Screen name="profile-settings" />
       <Stack.Screen name="zone-management" />
