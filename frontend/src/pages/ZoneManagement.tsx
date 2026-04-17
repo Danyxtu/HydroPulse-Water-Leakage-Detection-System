@@ -18,9 +18,13 @@ import {
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { styles } from "../styles/ZoneManagement.styles";
-import { waterService } from "../src/services/waterService";
-import { Zone } from "../types";
-import { COLORS } from "../constants/themes";
+import { waterService } from "@services/waterService";
+import { Zone } from "@src/types/index";
+
+// interface ZoneWithThreshold extends Zone {
+//   threshold?: number;
+// }
+import { COLORS } from "@constants/themes";
 
 export default function ZoneManagement() {
   const router = useRouter();
@@ -43,10 +47,13 @@ export default function ZoneManagement() {
   // --- Handle Save/Update ---
   const handleSave = async (zone: Zone) => {
     setSavingId(zone.id);
-    const response = await waterService.updateZone(zone.id, {
+    const updateData: any = {
       name: zone.name,
-      threshold: zone.threshold,
-    });
+    };
+    if (zone.threshold !== undefined) {
+      updateData.threshold = zone.threshold;
+    }
+    const response = await waterService.updateZone(zone.id, updateData);
 
     if (response.success) {
       Alert.alert("Success", `${zone.name} updated successfully.`);

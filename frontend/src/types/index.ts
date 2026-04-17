@@ -11,6 +11,8 @@ export interface Zone {
   totalVolume: number;
   status: "Running" | "Inactive" | "Leakage";
   timestamp: number;
+  threshold?: number; // Optional threshold for leakage detection
+  timeUsage?: string; // Optional field for usage duration
 
   // Optional fields
   duration?: string;

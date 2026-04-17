@@ -19,10 +19,10 @@ import {
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { PieChart } from "react-native-gifted-charts";
-import DetectionModal from "../components/DetectionModal";
-import { styles } from "../styles/Dashboard.styles";
-import { mqttService } from "../src/services/mqttService";
-import { Zone, CurrentUsage, ZoneStatus } from "../types";
+import DetectionModal from "@components/DetectionModal";
+import { styles } from "@styles/Dashboard.styles";
+import { mqttService } from "@services/mqttService";
+import { Zone, CurrentUsage, ZoneStatus } from "@src/types/index";
 
 // Mock Data - Initial display while waiting for MQTT
 const mockZoneData: Zone[] = [
@@ -86,7 +86,7 @@ const mockUsageData: CurrentUsage = {
   ],
 };
 
-// Reusable Zone Card Component
+
 const ZoneCard = ({ zone }: { zone: Zone }) => {
   const getStatusConfig = (status: ZoneStatus) => {
     switch (status) {
@@ -260,10 +260,8 @@ export default function Dashboard() {
     console.log("🔄 Pull to refresh triggered!");
 
     try {
-      // Wait a brief moment for visual feedback
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // If MQTT is disconnected, reconnect
       if (connectionState !== "connected") {
         console.log("🔌 Reconnecting MQTT...");
         mqttService.disconnect();

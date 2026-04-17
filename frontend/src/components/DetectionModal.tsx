@@ -7,10 +7,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { XCircle, Smartphone, Check, AlertCircle } from "lucide-react-native";
-import { useDetection } from "../hooks/useDetection";
-import { styles } from "../styles/DetectionModal.styles";
+import { useDetection } from "@hooks/useDetection";
+import { styles } from "@styles/DetectionModal.styles";
 
-import { mqttService } from "../services/mqttService";
+import { mqttService } from "@services/mqttService";
 
 interface DetectionModalProps {
   visible: boolean;

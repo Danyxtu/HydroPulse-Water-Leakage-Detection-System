@@ -9,9 +9,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronDown, Home, History } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { styles } from "../styles/ActivityLogs.styles";
-import { waterService } from "../src/services/waterService";
-import { LogEntry } from "../types";
+import { styles } from "@styles/ActivityLogs.styles";
+import { waterService } from "@services/waterService";
+import { LogEntry } from "@src/types/index";
 
 export default function ActivityLogs() {
   const router = useRouter();

@@ -9,9 +9,12 @@
       "@hooks/*": ["./src/hooks/*"],
       "@utils/*": ["./src/utils/*"],
       "@assets/*": ["./src/assets/*"],
-      "@types/*": ["./src/types/*"],
+      "@src/types/*": ["./src/types/*"],
       "@api/*": ["./src/api/*"],
-      "@context/*": ["./src/context/*"]
+      "@context/*": ["./src/context/*"],
+      "@services/*": ["./src/services/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@constants/*": ["./src/constants/*"]
     },
     "jsx": "react-native"
   },

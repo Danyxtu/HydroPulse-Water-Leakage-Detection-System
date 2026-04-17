@@ -13,7 +13,7 @@ import {
   Cpu,
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { styles } from "../styles/ProfileSettings.styles";
+import { styles } from "@styles/ProfileSettings.styles";
 
 // --- Reusable Component for Setting Rows ---
 interface SettingsRowProps {
