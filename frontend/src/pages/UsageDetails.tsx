@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronDown, ArrowLeftCircle } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { PieChart } from 'react-native-gifted-charts';
-import { styles } from '../styles/UsageDetails.styles';
-import { waterService } from '../services/waterService';
-import { LogEntry, CurrentUsage } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ChevronDown, ArrowLeftCircle } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { PieChart } from "react-native-gifted-charts";
+import { styles } from "../styles/UsageDetails.styles";
+import { waterService } from "../src/services/waterService";
+import { LogEntry, CurrentUsage } from "../types";
 
 export default function UsageDetails() {
   const router = useRouter();
@@ -26,7 +32,7 @@ export default function UsageDetails() {
         if (usageRes.success) setUsageData(usageRes.data);
         if (logsRes.success) setLogs(logsRes.data);
       } catch (error) {
-        console.error('FAILED TO FETCH USAGE DATA:', error);
+        console.error("FAILED TO FETCH USAGE DATA:", error);
       } finally {
         setLoading(false);
       }
@@ -60,13 +66,21 @@ export default function UsageDetails() {
           </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color="#4A90E2" style={{ marginVertical: 40 }} />
+            <ActivityIndicator
+              size="large"
+              color="#4A90E2"
+              style={{ marginVertical: 40 }}
+            />
           ) : (
             <>
               <View style={styles.chartContainer}>
                 {usageData && (
                   <PieChart
-                    data={usageData.stats.map(s => ({ ...s, textColor: '#1A3B5C', fontWeight: 'bold' }))}
+                    data={usageData.stats.map((s) => ({
+                      ...s,
+                      textColor: "#1A3B5C",
+                      fontWeight: "bold",
+                    }))}
                     radius={110}
                     showText
                     textSize={12}
@@ -81,14 +95,24 @@ export default function UsageDetails() {
                 {logs.map((log, index) => {
                   const isLast = index === logs.length - 1;
                   return (
-                    <View key={log.id} style={[styles.listItem, !isLast && styles.listItemBorder]}>
+                    <View
+                      key={log.id}
+                      style={[
+                        styles.listItem,
+                        !isLast && styles.listItemBorder,
+                      ]}
+                    >
                       <View style={styles.listLeft}>
                         <Text style={styles.listZone}>{log.zone}</Text>
                         <Text style={styles.listTime}>{log.time}</Text>
                       </View>
                       <View style={styles.listRight}>
-                        <Text style={styles.listDetail}>Usage Duration: {log.duration}</Text>
-                        <Text style={styles.listDetail}>Est. Volume: {log.volume}</Text>
+                        <Text style={styles.listDetail}>
+                          Usage Duration: {log.duration}
+                        </Text>
+                        <Text style={styles.listDetail}>
+                          Est. Volume: {log.volume}
+                        </Text>
                       </View>
                     </View>
                   );

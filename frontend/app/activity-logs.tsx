@@ -1,1 +1,1 @@
-export { default } from "../pages/ActivityLogs";
+export { default } from "@pages/ActivityLogs";

@@ -1,1 +1,1 @@
-export { default } from "../pages/ProfileSettings";
+export { default } from "@pages/ProfileSettings";

@@ -1,1 +1,1 @@
-export { default } from "../pages/Dashboard";
+export { default } from "@pages/ActivityLogs";

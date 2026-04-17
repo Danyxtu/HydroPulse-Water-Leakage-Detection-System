@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { COLORS, SIZES } from '../constants/themes';
+import { StyleSheet } from "react-native";
+import { COLORS, SIZES } from "../constants/themes";
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,16 +11,16 @@ export const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
     marginBottom: 10,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textDark,
   },
   addCard: {
@@ -28,17 +28,17 @@ export const styles = StyleSheet.create({
     borderRadius: SIZES.radiusMedium,
     padding: 20,
     marginBottom: 24,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderWidth: 2,
     borderColor: COLORS.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
     gap: 10,
   },
   addText: {
     color: COLORS.secondary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   zoneCard: {
@@ -47,20 +47,20 @@ export const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
   },
   zoneHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 15,
   },
   zoneName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textDark,
   },
   zoneId: {
@@ -73,10 +73,10 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textGray,
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   input: {
     backgroundColor: COLORS.background,
@@ -84,18 +84,18 @@ export const styles = StyleSheet.create({
     padding: 12,
     color: COLORS.textDark,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   flex1: {
     flex: 1,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     gap: 12,
     marginTop: 5,
   },
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
   },
   saveText: {
     color: COLORS.white,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
   },
   deleteBtn: {
@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
   },
   deleteText: {
     color: COLORS.red,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 14,
   },
 });

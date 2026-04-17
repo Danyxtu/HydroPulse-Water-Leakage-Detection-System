@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronDown, Home, History } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { styles } from '../styles/ActivityLogs.styles';
-import { waterService } from '../services/waterService';
-import { LogEntry } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ChevronDown, Home, History } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { styles } from "../styles/ActivityLogs.styles";
+import { waterService } from "../src/services/waterService";
+import { LogEntry } from "../types";
 
 export default function ActivityLogs() {
   const router = useRouter();
@@ -21,7 +27,7 @@ export default function ActivityLogs() {
           setLogs(response.data);
         }
       } catch (error) {
-        console.error('FAILED TO FETCH LOGS:', error);
+        console.error("FAILED TO FETCH LOGS:", error);
       } finally {
         setLoading(false);
       }
@@ -62,7 +68,11 @@ export default function ActivityLogs() {
       <View style={styles.listWrapper}>
         <View style={styles.card}>
           {loading ? (
-            <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 40 }} />
+            <ActivityIndicator
+              size="large"
+              color="#4A90E2"
+              style={{ marginTop: 40 }}
+            />
           ) : (
             <FlatList
               data={logs}
@@ -78,7 +88,7 @@ export default function ActivityLogs() {
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('/')}
+          onPress={() => router.push("/")}
         >
           <Text style={styles.navTextInactive}>Dashboard</Text>
           <Home size={24} color="#8E8E93" />

@@ -21,7 +21,7 @@ import { useRouter } from "expo-router";
 import { PieChart } from "react-native-gifted-charts";
 import DetectionModal from "../components/DetectionModal";
 import { styles } from "../styles/Dashboard.styles";
-import { mqttService } from "../services/mqttService";
+import { mqttService } from "../src/services/mqttService";
 import { Zone, CurrentUsage, ZoneStatus } from "../types";
 
 // Mock Data - Initial display while waiting for MQTT

@@ -3,14 +3,17 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@types/*": ["./src/types/*"],
+      "@api/*": ["./src/api/*"],
+      "@context/*": ["./src/context/*"]
     },
     "jsx": "react-native"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

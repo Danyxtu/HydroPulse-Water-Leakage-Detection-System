@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { mqttService } from "../services/mqttService";
+import { mqttService } from "../src/services/mqttService";
 
 export default function RootLayout() {
   useEffect(() => {

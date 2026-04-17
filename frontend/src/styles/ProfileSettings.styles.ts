@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { COLORS, SIZES } from '../constants/themes';
+import { StyleSheet } from "react-native";
+import { COLORS, SIZES } from "../constants/themes";
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,26 +11,26 @@ export const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: SIZES.padding,
     paddingVertical: 16,
     marginBottom: 10,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textDark,
   },
   profileCard: {
     backgroundColor: COLORS.white,
     borderRadius: SIZES.radiusMedium,
     padding: 24,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
@@ -40,20 +40,20 @@ export const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     backgroundColor: COLORS.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
     borderWidth: 4,
     borderColor: COLORS.background,
   },
   avatarText: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.white,
   },
   profileName: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textDark,
     marginBottom: 4,
   },
@@ -70,14 +70,14 @@ export const styles = StyleSheet.create({
   },
   editProfileText: {
     color: COLORS.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
   },
   sectionHeader: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.secondary,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginBottom: 10,
     marginLeft: 12,
   },
@@ -85,22 +85,22 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: SIZES.radiusMedium,
     marginBottom: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
   },
   settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 16,
   },
   settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   iconBox: {
@@ -108,8 +108,8 @@ export const styles = StyleSheet.create({
     height: 36,
     borderRadius: 10,
     backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
   },
   iconBoxDestructive: {
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textDark,
   },
   settingSubtitle: {
@@ -129,22 +129,22 @@ export const styles = StyleSheet.create({
     color: COLORS.red,
   },
   settingRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   settingValue: {
     fontSize: 14,
     color: COLORS.textGray,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   divider: {
     height: 1,
-    backgroundColor: '#F0F5FA',
+    backgroundColor: "#F0F5FA",
     marginLeft: 68,
   },
   versionText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
     color: COLORS.textGray,
     marginTop: 10,
