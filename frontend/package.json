@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "^9.1.0",
     "babel-preset-expo": "~54.0.10",
     "buffer": "^6.0.3",
     "expo": "~54.0.33",
@@ -20,7 +21,7 @@
     "expo-router": "~6.0.23",
     "expo-status-bar": "~3.0.9",
     "lucide-react-native": "^0.577.0",
-    "mqtt": "^5.15.0",
+    "mqtt": "^5.15.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-native": "0.81.5",

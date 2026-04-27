@@ -76,7 +76,7 @@ const ZoneCard = ({ zone }: { zone: Zone }) => {
     <View style={styles.enhancedCard}>
       <View style={styles.enhancedCardHeader}>
         <View style={styles.zoneNameContainer}>
-          <Text style={styles.enhancedZoneName}>{zone.name}</Text>
+          <Text style={styles.enhancedZoneName}>Zone {zone.id}</Text>
           <Text style={styles.zoneId}>Zone #{zone.id}</Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: config.bgColor }]}>
@@ -96,11 +96,12 @@ const ZoneCard = ({ zone }: { zone: Zone }) => {
           </Text>
         </View>
         <View style={styles.metricBox}>
-          <Text style={styles.metricLabel}>TOTAL VOLUME</Text>
+          <Text style={styles.metricLabel}>DAILY VOLUME</Text>
           <Text style={styles.metricValue}>
             {zone.totalVolume?.toFixed(2) || "0.00"}
             <Text style={styles.metricUnit}> L</Text>
           </Text>
+          <Text style={{ fontSize: 8, color: "#8E8E93", marginTop: 2 }}>Since 12:01 AM</Text>
         </View>
         <View style={styles.metricBox}>
           <Text style={styles.metricLabel}>DURATION</Text>

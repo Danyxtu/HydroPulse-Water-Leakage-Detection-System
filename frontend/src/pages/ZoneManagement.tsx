@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowLeftCircle,
   PlusCircle,
@@ -18,7 +18,6 @@ import {
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { styles } from "../styles/ZoneManagement.styles";
-import { waterService } from "@services/waterService";
 import { Zone } from "@src/types/index";
 
 // interface ZoneWithThreshold extends Zone {
@@ -31,88 +30,6 @@ export default function ZoneManagement() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
-
-  // --- Fetch Zones ---
-  const fetchZones = async () => {
-    setLoading(true);
-    const response = await waterService.getZones();
-    if (response.success) setZones(response.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchZones();
-  }, []);
-
-  // --- Handle Save/Update ---
-  const handleSave = async (zone: Zone) => {
-    setSavingId(zone.id);
-    const updateData: any = {
-      name: zone.name,
-    };
-    if (zone.threshold !== undefined) {
-      updateData.threshold = zone.threshold;
-    }
-    const response = await waterService.updateZone(zone.id, updateData);
-
-    if (response.success) {
-      Alert.alert("Success", `${zone.name} updated successfully.`);
-    } else {
-      Alert.alert("Error", "Failed to update zone settings.");
-    }
-    setSavingId(null);
-  };
-
-  // --- Handle Add New Zone ---
-  const handleAddZone = async () => {
-    const nextId = (zones.length + 1).toString();
-    const response = await waterService.createZone({
-      zoneId: nextId,
-      name: `New Zone ${nextId}`,
-      threshold: 5.0,
-      status: "Inactive",
-      timeUsage: "00:00",
-    });
-
-    if (response.success) {
-      fetchZones();
-    } else {
-      Alert.alert(
-        "Error",
-        "Failed to create new zone. Ensure backend is running.",
-      );
-    }
-  };
-
-  // --- Handle Delete ---
-  const handleDelete = async (id: string, name: string) => {
-    Alert.alert(
-      "Delete Zone",
-      `Are you sure you want to delete ${name}? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const response = await waterService.deleteZone(id);
-            if (response.success) {
-              setZones((prev) => prev.filter((z) => z.id !== id));
-            } else {
-              Alert.alert("Error", "Failed to delete zone.");
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  // --- Handle Local Input Change ---
-  const updateLocalZone = (id: string, field: keyof Zone, value: any) => {
-    setZones((prev) =>
-      prev.map((z) => (z.id === id ? { ...z, [field]: value } : z)),
-    );
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,7 +51,7 @@ export default function ZoneManagement() {
         showsVerticalScrollIndicator={false}
       >
         {/* --- Add New Zone Button --- */}
-        <TouchableOpacity style={styles.addCard} onPress={handleAddZone}>
+        <TouchableOpacity style={styles.addCard}>
           <PlusCircle size={24} color={COLORS.secondary} />
           <Text style={styles.addText}>Add New Hardware Unit</Text>
         </TouchableOpacity>
@@ -162,7 +79,7 @@ export default function ZoneManagement() {
                 </View>
                 <TouchableOpacity
                   style={styles.deleteBtn}
-                  onPress={() => handleDelete(zone.id, zone.name)}
+                  // onPress={() => handleDelete(zone.id, zone.name)}
                 >
                   <Trash2 size={20} color={COLORS.red} />
                 </TouchableOpacity>
@@ -174,9 +91,9 @@ export default function ZoneManagement() {
                 <TextInput
                   style={styles.input}
                   value={zone.name}
-                  onChangeText={(text) =>
-                    updateLocalZone(zone.id, "name", text)
-                  }
+                  // onChangeText={(text) =>
+                  //   // updateLocalZone(zone.id, "name", text)
+                  // }
                   placeholder="e.g. Garden Area"
                 />
               </View>
@@ -186,9 +103,9 @@ export default function ZoneManagement() {
                 <TextInput
                   style={styles.input}
                   value={zone.threshold?.toString() || "5.0"}
-                  onChangeText={(text) =>
-                    updateLocalZone(zone.id, "threshold", parseFloat(text) || 0)
-                  }
+                  // onChangeText={(text) =>
+                  // updateLocalZone(zone.id, "threshold", parseFloat(text) || 0)
+                  // }
                   keyboardType="numeric"
                   placeholder="Sensitivity"
                 />
@@ -197,7 +114,7 @@ export default function ZoneManagement() {
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={styles.saveBtn}
-                  onPress={() => handleSave(zone)}
+                  // onPress={() => handleSave(zone)}
                   disabled={savingId === zone.id}
                 >
                   {savingId === zone.id ? (

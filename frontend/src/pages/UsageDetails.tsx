@@ -11,7 +11,6 @@ import { ChevronDown, ArrowLeftCircle } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { PieChart } from "react-native-gifted-charts";
 import { styles } from "@styles/UsageDetails.styles";
-import { waterService } from "@services/waterService";
 import { LogEntry, CurrentUsage } from "@src/types/index";
 
 export default function UsageDetails() {
@@ -19,26 +18,6 @@ export default function UsageDetails() {
   const [usageData, setUsageData] = useState<CurrentUsage | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // --- Fetch Usage & Logs ---
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const [usageRes, logsRes] = await Promise.all([
-          waterService.getCurrentUsage(),
-          waterService.getActivityLogs(),
-        ]);
-
-        if (usageRes.success) setUsageData(usageRes.data);
-        if (logsRes.success) setLogs(logsRes.data);
-      } catch (error) {
-        console.error("FAILED TO FETCH USAGE DATA:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAllData();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

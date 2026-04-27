@@ -5,170 +5,186 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronDown } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { PieChart } from "react-native-gifted-charts";
-import DetectionModal from "@components/DetectionModal";
+import ConnectionBadge from "@components/Dashboard/ConnectionBadge";
+import ZoneModal from "../components/ZoneModal";
 
 // Styles
 import { styles } from "@styles/Dashboard.styles";
 
-import { mqttService } from "@services/mqttService";
-
 // Type
-import { Zone, CurrentUsage, ZoneStatus } from "@src/types/index";
+import { Zone, ZoneStatus } from "@src/types/index";
+import { MqttTelemetryPayload } from "@src/types/mqtt.types";
 
 // Mock Datas
-import { mockUsageData, mockZoneData } from "@data/index";
+import { mockZoneData } from "@data/index";
 
 // Components
 import ZoneCard from "@components/Dashboard/ZoneCard";
+import UsageToggle from "@components/Dashboard/UsageToggle";
 
-// Connection Status Badge
-const ConnectionBadge = ({ state }: { state: string }) => {
-  const config = {
-    connected: { color: "#2ECC71", text: "🟢 Live", bg: "#EAF3DE" },
-    connecting: { color: "#F1C40F", text: "🟡 Connecting...", bg: "#FAEEDA" },
-    disconnected: { color: "#8E8E93", text: "⚫ Offline", bg: "#F8F9FA" },
-    error: { color: "#E74C3C", text: "🔴 Error", bg: "#FCEBEB" },
-  }[state] || { color: "#8E8E93", text: "⚫ Unknown", bg: "#F8F9FA" };
+// hooks
+import { useMqtt } from "@hooks/useMqtt";
+import { useMqttContext } from "@context/MqttContext";
+import { apiService } from "@services/apiService";
 
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: config.bg,
-        borderRadius: 8,
-        marginBottom: 12,
-        marginHorizontal: 16,
-      }}
-    >
-      <Text style={{ fontSize: 11, fontWeight: "600", color: config.color }}>
-        {config.text}
-      </Text>
-    </View>
-  );
+const toZoneStatus = (status?: string): ZoneStatus => {
+  const normalized = (status || "").toUpperCase();
+
+  if (normalized === "LEAK" || normalized === "LEAKAGE") {
+    return "Leakage";
+  }
+
+  if (
+    normalized === "ON" ||
+    normalized === "WARN" ||
+    normalized === "RUNNING"
+  ) {
+    return "Running";
+  }
+
+  return "Inactive";
+};
+
+const toTimestamp = (value?: string) => {
+  if (!value) {
+    return Date.now();
+  }
+
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : Date.now();
 };
 
 export default function Dashboard() {
   const router = useRouter();
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [zoneData, setZoneData] = useState<Zone[]>(mockZoneData);
-  const [usageData, setUsageData] = useState<CurrentUsage | null>(
-    mockUsageData,
-  );
+  const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
+  const [isZoneModalVisible, setIsZoneModalVisible] = useState(false);
+  const { status: connectionStatus } = useMqttContext();
+  const [activeToggle, setActiveToggle] = useState("Today");
   const [loading, setLoading] = useState(false);
-  const [connectionState, setConnectionState] =
-    useState<string>("disconnected");
-  const [refreshing, setRefreshing] = useState(false); // ← Pull-to-refresh state
 
-  // ============================================
-  // PULL TO REFRESH HANDLER
-  // ============================================
-  const onRefresh = async () => {
-    setRefreshing(true);
-    console.log("🔄 Pull to refresh triggered!");
+  const { latestData: telemetryData } = useMqtt<MqttTelemetryPayload>(
+    "hydropulse/zones/+/telemetry",
+  );
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+  useEffect(() => {
+    let active = true;
 
-      if (connectionState !== "connected") {
-        console.log("🔌 Reconnecting MQTT...");
-        mqttService.disconnect();
+    const loadInitialZones = async () => {
+      setLoading(true);
+      const response = await apiService.getZones();
 
-        mqttService.connect({
-          onStatusUpdate: handleStatusUpdate,
-          onConnectionChange: (state) => {
-            console.log("🔌 Connection state:", state);
-            setConnectionState(state);
-          },
-          onError: (error) => {
-            console.error("❌ MQTT Error:", error.message);
-          },
-        });
+      if (active && response.success && response.data.length > 0) {
+        const mapped = response.data.map((zone: any) => ({
+          id: String(zone.zoneId || zone.id),
+          zoneId: String(zone.zoneId || zone.id),
+          name: zone.name,
+          flowRate: Number(zone.flowRate) || 0,
+          totalVolume: Number(zone.totalVolume) || 0,
+          status: toZoneStatus(zone.status),
+          timestamp: toTimestamp(zone.lastUpdate),
+          duration: "0",
+        })) as Zone[];
+
+        setZoneData(mapped);
       }
 
-      console.log("✅ Dashboard refreshed!");
-    } catch (error) {
-      console.error("❌ Refresh failed:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+      if (active) {
+        setLoading(false);
+      }
+    };
 
-  // ============================================
-  // STATUS UPDATE HANDLER (extracted for reuse)
-  // ============================================
-  const handleStatusUpdate = (data: any) => {
-    console.log("\n🎉 DASHBOARD RECEIVED UPDATE!");
-    console.log("Zone ID:", data.zoneId);
-    console.log("Flow Rate:", data.flowRate, "L/min");
-    console.log("Total Volume:", data.totalVolume, "L");
-    console.log("Status:", data.status);
-
-    setZoneData((prevZones) =>
-      prevZones.map((zone) =>
-        zone.zoneId === data.zoneId
-          ? {
-              ...zone,
-              flowRate: data.flowRate,
-              totalVolume: data.totalVolume,
-              status: data.status as ZoneStatus,
-              timestamp: data.timestamp || Date.now(),
-              name: data.zoneName || zone.name,
-            }
-          : zone,
-      ),
-    );
-
-    console.log("✅ Zone data updated in state\n");
-  };
-
-  // ============================================
-  // MQTT REAL-TIME INTEGRATION
-  // ============================================
-  useEffect(() => {
-    console.log("🚀 Initializing MQTT connection...");
-
-    mqttService.connect({
-      onStatusUpdate: handleStatusUpdate,
-      onConnectionChange: (state) => {
-        console.log("🔌 Connection state:", state);
-        setConnectionState(state);
-      },
-      onError: (error) => {
-        console.error("❌ MQTT Error:", error.message);
-      },
-    });
+    loadInitialZones();
 
     return () => {
-      console.log("🧹 Disconnecting MQTT...");
-      mqttService.disconnect();
+      active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!telemetryData?.zoneId) {
+      return;
+    }
+
+    const zoneId = String(telemetryData.zoneId);
+    const flowRate = Number(telemetryData.flowRate) || 0;
+    const totalVolume = Number(telemetryData.totalVol) || 0;
+    const status = toZoneStatus(telemetryData.status);
+    const now = Date.now();
+
+    setZoneData((currentZones) => {
+      const exists = currentZones.some(
+        (zone) => String(zone.id) === zoneId || String(zone.zoneId) === zoneId,
+      );
+
+      if (!exists) {
+        const nextZone: Zone = {
+          id: zoneId,
+          zoneId,
+          name: `Zone ${zoneId}`,
+          flowRate,
+          totalVolume,
+          status,
+          timestamp: now,
+          duration: "0",
+          startTime: status === "Running" ? now : undefined,
+        };
+
+        return [...currentZones, nextZone].sort(
+          (a, b) => Number(a.id) - Number(b.id),
+        );
+      }
+
+      return currentZones.map((zone) => {
+        const isTargetZone =
+          String(zone.id) === zoneId || String(zone.zoneId) === zoneId;
+
+        if (!isTargetZone) {
+          return zone;
+        }
+
+        const wasRunning = zone.status === "Running";
+        const isRunning = status === "Running";
+
+        return {
+          ...zone,
+          id: zoneId,
+          zoneId,
+          flowRate,
+          totalVolume,
+          status,
+          timestamp: now,
+          startTime: isRunning
+            ? wasRunning
+              ? zone.startTime
+              : now
+            : undefined,
+        };
+      });
+    });
+  }, [telemetryData]);
+
+  const estimatedTotalVolume = zoneData
+    .reduce((sum, zone) => sum + (Number(zone.totalVolume) || 0), 0)
+    .toFixed(2);
+
+  const handleZonePress = (zone: Zone) => {
+    setSelectedZone(zone);
+    setIsZoneModalVisible(true);
+  };
+
+  const handleCloseZoneModal = () => {
+    setIsZoneModalVisible(false);
+  };
 
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#4A90E2"]} // Android
-              tintColor="#4A90E2" // iOS
-              title="Pull to refresh" // iOS
-              titleColor="#8E8E93" // iOS
-            />
-          }
-        >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* --- Header --- */}
           <TouchableOpacity
             style={styles.header}
@@ -188,7 +204,7 @@ export default function Dashboard() {
           </TouchableOpacity>
 
           {/* --- Connection Status --- */}
-          <ConnectionBadge state={connectionState} />
+          <ConnectionBadge state={connectionStatus} />
 
           {/* --- Loading Indicator --- */}
           {loading && (
@@ -200,11 +216,21 @@ export default function Dashboard() {
           )}
 
           {/* --- Zone Cards (Real-time updates) --- */}
+          <Text style={styles.zoneHintText}>Click the cards to view more</Text>
           <View style={styles.zonesContainer}>
             {zoneData.map((zone) => (
-              <ZoneCard key={zone.id} zone={zone} />
+              <TouchableOpacity
+                key={zone.id}
+                activeOpacity={0.94}
+                onPress={() => handleZonePress(zone)}
+              >
+                <ZoneCard zone={zone} />
+              </TouchableOpacity>
             ))}
           </View>
+
+          {/* --- Usage Toggle --- */}
+          <UsageToggle activeTab={activeToggle} onTabChange={setActiveToggle} />
 
           {/* --- Analytics Card --- */}
           <TouchableOpacity
@@ -214,47 +240,24 @@ export default function Dashboard() {
           >
             <View style={styles.analyticsInfo}>
               <Text style={styles.analyticsTitle}>
-                Today's{"\n"}Current{"\n"}Usage
+                {activeToggle}'s{"\n"}Current{"\n"}Usage
               </Text>
               <View style={styles.analyticsStats}>
                 <Text style={styles.statsText}>
-                  Time: {usageData?.time || "00:00"}
-                </Text>
-                <Text style={styles.statsText}>
-                  Est. Volume: {usageData?.estimatedVolume || "0.0L"}
+                  Est. Volume: {estimatedTotalVolume}L
                 </Text>
               </View>
             </View>
-            {usageData && (
-              <PieChart
-                data={usageData.stats.map((s) => ({
-                  ...s,
-                  textColor: "#fff",
-                  fontSize: 10,
-                }))}
-                radius={60}
-                showText
-                textSize={10}
-                textColor="#fff"
-              />
-            )}
-          </TouchableOpacity>
-
-          {/* --- Action Button --- */}
-          <TouchableOpacity
-            style={styles.actionButton}
-            activeOpacity={0.8}
-            onPress={() => setIsModalVisible(true)}
-          >
-            <Text style={styles.actionButtonText}>Start Detection</Text>
           </TouchableOpacity>
         </ScrollView>
 
         {/* --- Bottom Navigation --- */}
       </SafeAreaView>
-      <DetectionModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+
+      <ZoneModal
+        visible={isZoneModalVisible}
+        zone={selectedZone}
+        onClose={handleCloseZoneModal}
       />
     </>
   );

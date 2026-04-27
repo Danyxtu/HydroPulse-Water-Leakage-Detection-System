@@ -1,610 +1,458 @@
-// #include <Arduino.h>
-// #include <WiFi.h>
-// #include <PubSubClient.h>
-// #include <ArduinoJson.h>
-// #include <WiFiClientSecure.h> 
-
-// #define MQTT_MAX_PACKET_SIZE 512
-
-// // --- Sensor Pins ---
-// #define SENSOR_1_PIN 25
-// #define SENSOR_2_PIN 26
-// #define SENSOR_3_PIN 27
-
-// // --- WiFi & MQTT Config ---
-// const char *ssid = "Danny";
-// const char *password = "nononnein";
-// // const char *mqtt_server = "broker.hivemq.com";
-// // const char *mqtt_command_topic = "hydropulse/commands/#";
-
-// // --- HiveMQ Cloud Config ---
-// const char *mqtt_server = "danny-0fc5e19c.a01.euc1.aws.hivemq.cloud";  // ← YOUR CLUSTER URL
-// const int mqtt_port = 8883;  // Use 8883 for secure (recommended) or 1883 for non-secure
-// const char *mqtt_user = "hydropulse";  // ← YOUR USERNAME
-// const char *mqtt_password = "Hydropulse123";  // ← YOUR PASSWORD
-// const char *mqtt_command_topic = "hydropulse/commands/#";
-
-// // --- Calibration ---
-// const float PULSES_PER_LITER = 450.0;
-// const float K_FACTOR = 7.0;
-// const unsigned long LEAK_THRESHOLD_MS = 1800000;  // 30 minutes
-// const unsigned long LONG_USAGE_MS = 300000;        // 5 minutes
-
-// // --- Objects ---
-// WiFiClientSecure espClient;
-// PubSubClient client(espClient);
-
-// struct WaterZone
-// {
-//   String id;
-//   String name;
-//   volatile unsigned long totalPulses;
-//   volatile int currentSecondPulses;
-//   float flowRateLmin;
-//   unsigned long flowStartTime;
-//   bool isFlowing;
-//   String status;
-// };
-
-// WaterZone zones[3] = {
-//     {"1", "Kitchen", 0, 0, 0.0, 0, false, "Inactive"},
-//     {"2", "Guest Bath", 0, 0, 0.0, 0, false, "Inactive"},
-//     {"3", "Master Bath", 0, 0, 0.0, 0, false, "Inactive"}};
-
-// unsigned long lastMillis = 0;
-
-// // --- Interrupts with Debouncing ---
-// void IRAM_ATTR pulseCounter1()
-// {
-//   static unsigned long lastMicros = 0;
-//   unsigned long now = micros();
-//   if (now - lastMicros > 10000) { // 10ms debounce in microseconds
-//     zones[0].totalPulses++;
-//     zones[0].currentSecondPulses++;
-//     lastMicros = now;
-//   }
-// }
-
-// void IRAM_ATTR pulseCounter2()
-// {
-//   static unsigned long lastMicros = 0;
-//   unsigned long now = micros();
-//   if (now - lastMicros > 10000) {
-//     zones[1].totalPulses++;
-//     zones[1].currentSecondPulses++;
-//     lastMicros = now;
-//   }
-// }
-
-// void IRAM_ATTR pulseCounter3()
-// {
-//   static unsigned long lastMicros = 0;
-//   unsigned long now = micros();
-//   if (now - lastMicros > 10000) {
-//     zones[2].totalPulses++;
-//     zones[2].currentSecondPulses++;
-//     lastMicros = now;
-//   }
-// }
-
-// // --- MQTT Callback ---
-// void callback(char *topic, byte *payload, unsigned int length)
-// {
-//   JsonDocument doc;
-//   deserializeJson(doc, payload, length);
-//   const char *action = doc["action"];
-  
-//   if (action && strcmp(action, "START_SCAN") == 0)
-//   {
-//     Serial.println("COMMAND: Starting diagnostic...");
-//   }
-//   else if (action && strcmp(action, "RESET_TOTALS") == 0)
-//   {
-//     Serial.println("COMMAND: Resetting all zone totals...");
-//     for (int i = 0; i < 3; i++)
-//     {
-//       noInterrupts();
-//       zones[i].totalPulses = 0;
-//       interrupts();
-//     }
-//   }
-// }
-
-// // --- WiFi Setup ---
-// void setup_wifi()
-// {
-//   delay(10);
-//   Serial.print("Connecting to ");
-//   Serial.println(ssid);
-//   WiFi.begin(ssid, password);
-  
-//   int timeout = 0;
-//   while (WiFi.status() != WL_CONNECTED && timeout < 20) 
-//   {
-//     delay(500);
-//     Serial.print(".");
-//     timeout++;
-//   }
-  
-//   if (WiFi.status() == WL_CONNECTED) 
-//   {
-//     Serial.println("\nWiFi connected");
-//     Serial.print("IP: ");
-//     Serial.println(WiFi.localIP());
-//   } 
-//   else 
-//   {
-//     Serial.println("\nWiFi connection failed!");
-//   }
-// }
-
-// // --- MQTT Reconnect ---
-// void reconnect()
-// {
-//   while (!client.connected())
-//   {
-//     Serial.print("Attempting MQTT...");
-//     if (client.connect("ESP32_HydroPulse_Multi"))
-//     {
-//       Serial.println("connected");
-//       client.subscribe(mqtt_command_topic);
-//     }
-//     else
-//     {
-//       Serial.print("failed, rc=");
-//       Serial.print(client.state());
-//       Serial.println(" retrying in 5s");
-//       delay(5000);
-//     }
-//   }
-// }
-
-// // --- Publish Zone Data ---
-// void publishZone(WaterZone &z)
-// {
-//   JsonDocument doc;
-//   doc["zoneId"] = z.id;
-//   doc["zoneName"] = z.name;
-//   doc["flowRate"] = z.flowRateLmin;
-  
-//   // Read totalPulses atomically
-//   noInterrupts();
-//   unsigned long pulses = z.totalPulses;
-//   interrupts();
-  
-//   doc["totalVolume"] = (float)pulses / PULSES_PER_LITER;
-//   doc["status"] = z.status;
-
-//   char buffer[256];
-//   serializeJson(doc, buffer);
-//   String topic = "hydropulse/status/" + z.id;
-  
-//   if (client.publish(topic.c_str(), buffer))
-//   {
-//     // Publish successful
-//   }
-//   else
-//   {
-//     Serial.println("MQTT publish failed for zone " + z.id);
-//   }
-// }
-
-// // --- Setup ---
-// void setup()
-// {
-//   Serial.begin(115200);
-//   delay(1000); // Give serial time to initialize
-  
-//   Serial.println("\n=== HydroPulse Multi-Zone Monitor ===");
-//   Serial.println("Initializing...");
-  
-//   // WiFi setup
-//   setup_wifi();
-  
-//   // MQTT setup
-//   client.setBufferSize(512);
-//   client.setServer(mqtt_server, 1883);
-//   client.setCallback(callback);
-  
-//   // Pin setup
-//   pinMode(SENSOR_1_PIN, INPUT_PULLUP);
-//   pinMode(SENSOR_2_PIN, INPUT_PULLUP);
-//   pinMode(SENSOR_3_PIN, INPUT_PULLUP);
-
-//   // Interrupt setup
-//   attachInterrupt(digitalPinToInterrupt(SENSOR_1_PIN), pulseCounter1, FALLING);
-//   attachInterrupt(digitalPinToInterrupt(SENSOR_2_PIN), pulseCounter2, FALLING);
-//   attachInterrupt(digitalPinToInterrupt(SENSOR_3_PIN), pulseCounter3, FALLING);
-  
-//   Serial.println("Setup complete!");
-//   Serial.println("Monitoring zones:");
-//   for (int i = 0; i < 3; i++)
-//   {
-//     Serial.printf("  Zone %s: %s (Pin %d)\n", 
-//                   zones[i].id.c_str(), 
-//                   zones[i].name.c_str(),
-//                   (i == 0) ? SENSOR_1_PIN : (i == 1) ? SENSOR_2_PIN : SENSOR_3_PIN);
-//   }
-//   Serial.println();
-// }
-
-// // --- Main Loop ---
-// void loop()
-// {
-//   // Maintain MQTT connection
-//   if (!client.connected())
-//   {
-//     reconnect();
-//   }
-//   client.loop();
-
-//   // Process data every second
-//   if (millis() - lastMillis >= 1000)
-//   {
-//     Serial.println("\n--- HYDRO PULSE REPORT ---");
-    
-//     for (int i = 0; i < 3; i++)
-//     {
-//       // Atomic read and reset of pulse count
-//       noInterrupts();
-//       int pulsesThisSecond = zones[i].currentSecondPulses;
-//       zones[i].currentSecondPulses = 0;
-//       interrupts();
-      
-//       // Calculate flow rate
-//       zones[i].flowRateLmin = (float)pulsesThisSecond / K_FACTOR;
-
-//       // Determine status based on flow
-//       if (zones[i].flowRateLmin > 0.1)
-//       {
-//         // Water is flowing
-//         if (!zones[i].isFlowing)
-//         {
-//           zones[i].isFlowing = true;
-//           zones[i].flowStartTime = millis();
-//         }
-        
-//         unsigned long flowDuration = millis() - zones[i].flowStartTime;
-        
-//         if (flowDuration > LEAK_THRESHOLD_MS)
-//         {
-//           zones[i].status = "LEAK DETECTED!";
-//         }
-//         else if (flowDuration > LONG_USAGE_MS)
-//         {
-//           zones[i].status = "Long Usage";
-//         }
-//         else
-//         {
-//           zones[i].status = "Running";
-//         }
-//       }
-//       else
-//       {
-//         // No flow detected
-//         zones[i].isFlowing = false;
-//         zones[i].status = "Inactive";
-//       }
-
-//       // Print to Serial Monitor
-//       Serial.printf("Zone %d [%s]: %.2f L/min | Status: %s | Total: %.2f L\n", 
-//                     i + 1, 
-//                     zones[i].name.c_str(), 
-//                     zones[i].flowRateLmin, 
-//                     zones[i].status.c_str(),
-//                     (float)zones[i].totalPulses / PULSES_PER_LITER);
-
-//       // Publish to MQTT
-//       publishZone(zones[i]);
-//     }
-    
-//     lastMillis = millis();
-//   }
-// }
-
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WiFiClientSecure.h>  // For SSL/TLS
+#include <WiFiClientSecure.h> 
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7789.h>
 
-#define MQTT_MAX_PACKET_SIZE 512
+// ==============================================================================
+// CONFIG
+// ==============================================================================
+#define MQTT_MAX_PACKET_SIZE 256
 
-// --- Sensor Pins ---
-#define SENSOR_1_PIN 25
-#define SENSOR_2_PIN 26
-#define SENSOR_3_PIN 27
+const char *WIFI_SSID = "Danny";
+const char *WIFI_PASSWORD = "nononnein";
 
-// --- WiFi Config ---
-const char *ssid = "Danny";
-const char *password = "nononnein";
+const char *MQTT_BROKER = "7e224ba4113345ca914279edb263cf4c.s1.eu.hivemq.cloud";
+const int MQTT_PORT = 8883; 
+const char *MQTT_USER = "hydropulse";
+const char *MQTT_PASSWORD = "Hydropulse123";
 
-// --- HiveMQ Cloud Config ---
-const char *mqtt_server = "Danny-0fc5e19c.a01.euc1.aws.hivemq.cloud";  // ← CHANGE THIS
-const int mqtt_port = 8883;  // 8883 for SSL, 1883 for non-SSL
-const char *mqtt_user = "hydropulse";  // ← CHANGE THIS
-const char *mqtt_password = "Hydropulse123";  // ← CHANGE THIS
-const char *mqtt_command_topic = "hydropulse/commands/#";
+const uint8_t PIN_SENSOR_1 = 25;
+const uint8_t PIN_SENSOR_2 = 26;
+const uint8_t PIN_SENSOR_3 = 27;
 
-// --- Calibration ---
+#define TFT_CS   21
+#define TFT_DC   2
+#define TFT_RST  17
+
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+
+#define COLOR_DARKGREY 0x39E7
+
 const float PULSES_PER_LITER = 450.0;
 const float K_FACTOR = 7.0;
-const unsigned long LEAK_THRESHOLD_MS = 1800000;
-const unsigned long LONG_USAGE_MS = 300000;
 
-// --- Objects ---
-WiFiClientSecure espClient;  // Changed for SSL
-PubSubClient client(espClient);
-
-struct WaterZone
-{
-  String id;
-  String name;
-  volatile unsigned long totalPulses;
-  volatile int currentSecondPulses;
-  float flowRateLmin;
-  unsigned long flowStartTime;
-  bool isFlowing;
-  String status;
+const unsigned long MIN_PULSE_INTERVAL_US_DEFAULT = 2500;
+const unsigned long MIN_PULSE_INTERVAL_US_BY_ZONE[3] = {
+  MIN_PULSE_INTERVAL_US_DEFAULT,
+  MIN_PULSE_INTERVAL_US_DEFAULT,
+  5000 // Zone 3 gets extra debounce to reject line noise.
 };
 
-WaterZone zones[3] = {
-    {"1", "Kitchen", 0, 0, 0.0, 0, false, "Inactive"},
-    {"2", "Guest Bath", 0, 0, 0.0, 0, false, "Inactive"},
-    {"3", "Master Bath", 0, 0, 0.0, 0, false, "Inactive"}};
+const int MIN_VALID_PULSES_PER_SECOND_DEFAULT = 2;
+const int MIN_VALID_PULSES_PER_SECOND_BY_ZONE[3] = {
+  MIN_VALID_PULSES_PER_SECOND_DEFAULT,
+  MIN_VALID_PULSES_PER_SECOND_DEFAULT,
+  3 // Require a stronger signal on Zone 3 before reporting flow.
+};
 
-unsigned long lastMillis = 0;
+const float MAX_VALID_FLOW_LMIN = 60.0;
+const float FLOW_ON_THRESHOLD_LMIN = 0.30;
+const float FLOW_OFF_THRESHOLD_LMIN = 0.15;
+const uint8_t FLOW_START_CONFIRM_SECONDS = 2;
+const uint8_t FLOW_STOP_CONFIRM_SECONDS = 2;
 
-// --- Interrupts ---
-void IRAM_ATTR pulseCounter1()
-{
-  static unsigned long lastMicros = 0;
-  unsigned long now = micros();
-  if (now - lastMicros > 10000) {
-    zones[0].totalPulses++;
-    zones[0].currentSecondPulses++;
-    lastMicros = now;
-  }
+const unsigned long THRESHOLD_LEAK_MS = 1800000;
+const unsigned long THRESHOLD_LONG_USAGE_MS = 300000;
+
+// ==============================================================================
+// NETWORK
+// ==============================================================================
+WiFiClientSecure secureClient;
+PubSubClient mqttClient(secureClient);
+
+// ==============================================================================
+// STRUCTS
+// ==============================================================================
+struct WaterSensor {
+  String id;
+  String name;
+  uint8_t pin;
+
+  volatile unsigned long totalPulses;
+  volatile int pulsesThisSecond;
+
+  float flowRateLmin;
+  bool isFlowing;
+  String status;
+
+  unsigned long flowStartTimeMs;
+
+  unsigned long sessionStartTimeMs;
+  float sessionStartVolume;
+  bool wasFlowing;
+
+  unsigned long lastAlertTime;
+};
+
+// DTOs
+struct TelemetryDTO {
+  const char* zoneId;
+  float flowRate;
+  float totalVolume;
+  const char* status;
+};
+
+struct AlertDTO {
+  const char* zoneId;
+  const char* alertType;
+  const char* msg;
+};
+
+struct UsageDTO {
+  const char* zoneId;
+  float totalVolume;
+  unsigned long durationMs;
+  const char* status;
+};
+
+// ==============================================================================
+// UTILS
+// ==============================================================================
+void logMsg(String msg) {
+  Serial.println("[LOG] " + msg);
 }
 
-void IRAM_ATTR pulseCounter2()
-{
-  static unsigned long lastMicros = 0;
-  unsigned long now = micros();
-  if (now - lastMicros > 10000) {
-    zones[1].totalPulses++;
-    zones[1].currentSecondPulses++;
-    lastMicros = now;
-  }
-}
-
-void IRAM_ATTR pulseCounter3()
-{
-  static unsigned long lastMicros = 0;
-  unsigned long now = micros();
-  if (now - lastMicros > 10000) {
-    zones[2].totalPulses++;
-    zones[2].currentSecondPulses++;
-    lastMicros = now;
-  }
-}
-
-void callback(char *topic, byte *payload, unsigned int length)
-{
+// ==============================================================================
+// MQTT PUBLISHERS
+// ==============================================================================
+void publishTelemetry(TelemetryDTO data) {
   JsonDocument doc;
-  deserializeJson(doc, payload, length);
-  const char *action = doc["action"];
-  
-  if (action && strcmp(action, "START_SCAN") == 0)
-  {
-    Serial.println("COMMAND: Starting diagnostic...");
-  }
-  else if (action && strcmp(action, "RESET_TOTALS") == 0)
-  {
-    Serial.println("COMMAND: Resetting all zone totals...");
-    for (int i = 0; i < 3; i++)
-    {
-      noInterrupts();
-      zones[i].totalPulses = 0;
-      interrupts();
-    }
-  }
-}
-
-void setup_wifi()
-{
-  delay(10);
-  Serial.print("Connecting to WiFi: ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  
-  int timeout = 0;
-  while (WiFi.status() != WL_CONNECTED && timeout < 20) 
-  {
-    delay(500);
-    Serial.print(".");
-    timeout++;
-  }
-  
-  if (WiFi.status() == WL_CONNECTED) 
-  {
-    Serial.println("\n✓ WiFi connected");
-    Serial.print("  IP Address: ");
-    Serial.println(WiFi.localIP());
-    Serial.print("  Signal: ");
-    Serial.print(WiFi.RSSI());
-    Serial.println(" dBm");
-  } 
-  else 
-  {
-    Serial.println("\n✗ WiFi connection failed!");
-  }
-}
-
-void reconnect()
-{
-  while (!client.connected())
-  {
-    Serial.print("Connecting to HiveMQ Cloud: ");
-    Serial.print(mqtt_server);
-    Serial.print(":");
-    Serial.println(mqtt_port);
-    
-    if (client.connect("ESP32_HydroPulse_Multi", mqtt_user, mqtt_password))
-    {
-      Serial.println("✓ MQTT connected to HiveMQ Cloud!");
-      client.subscribe(mqtt_command_topic);
-      
-      // Publish startup message
-      JsonDocument doc;
-      doc["device"] = "ESP32_HydroPulse";
-      doc["status"] = "online";
-      doc["zones"] = 3;
-      char buffer[128];
-      serializeJson(doc, buffer);
-      client.publish("hydropulse/system/status", buffer);
-    }
-    else
-    {
-      Serial.print("✗ MQTT failed, rc=");
-      Serial.print(client.state());
-      Serial.println();
-      
-      // Print error details
-      switch(client.state()) {
-        case -4: Serial.println("  → Connection timeout"); break;
-        case -3: Serial.println("  → Connection lost"); break;
-        case -2: Serial.println("  → Connect failed"); break;
-        case -1: Serial.println("  → Disconnected"); break;
-        case 1: Serial.println("  → Bad protocol"); break;
-        case 2: Serial.println("  → Bad client ID"); break;
-        case 3: Serial.println("  → Unavailable"); break;
-        case 4: Serial.println("  → Bad credentials"); break;
-        case 5: Serial.println("  → Unauthorized"); break;
-      }
-      
-      Serial.println("  Retrying in 5s...");
-      delay(5000);
-    }
-  }
-}
-
-void publishZone(WaterZone &z)
-{
-  JsonDocument doc;
-  doc["zoneId"] = z.id;
-  doc["zoneName"] = z.name;
-  doc["flowRate"] = z.flowRateLmin;
-  
-  noInterrupts();
-  unsigned long pulses = z.totalPulses;
-  interrupts();
-  
-  doc["totalVolume"] = (float)pulses / PULSES_PER_LITER;
-  doc["status"] = z.status;
-  doc["timestamp"] = millis();
+  doc["zoneId"] = data.zoneId;
+  doc["flowRate"] = data.flowRate;
+  doc["totalVol"] = data.totalVolume;
+  doc["status"] = data.status;
 
   char buffer[256];
   serializeJson(doc, buffer);
-  String topic = "hydropulse/status/" + z.id;
-  
-  if (!client.publish(topic.c_str(), buffer))
-  {
-    Serial.println("✗ MQTT publish failed for zone " + z.id);
+
+  String topic = "hydropulse/zones/" + String(data.zoneId) + "/telemetry";
+  if (mqttClient.publish(topic.c_str(), buffer)) {
+    // logMsg("Telemetry sent to " + topic);
+  } else {
+    logMsg("Failed to send Telemetry to " + topic);
   }
 }
 
-void setup()
-{
-  Serial.begin(115200);
-  delay(1000);
-  
-  Serial.println("\n╔════════════════════════════════════╗");
-  Serial.println("║  HydroPulse Multi-Zone Monitor    ║");
-  Serial.println("║  HiveMQ Cloud Edition              ║");
-  Serial.println("╚════════════════════════════════════╝\n");
-  
-  setup_wifi();
-  
-  // Configure SSL/TLS for HiveMQ Cloud
-  espClient.setInsecure();  // Skip certificate validation
-  
-  client.setBufferSize(512);
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
-  
-  pinMode(SENSOR_1_PIN, INPUT_PULLUP);
-  pinMode(SENSOR_2_PIN, INPUT_PULLUP);
-  pinMode(SENSOR_3_PIN, INPUT_PULLUP);
+void publishAlert(AlertDTO alert) {
+  JsonDocument doc;
+  doc["zoneId"] = alert.zoneId;
+  doc["alertType"] = alert.alertType;
+  doc["msg"] = alert.msg;
 
-  attachInterrupt(digitalPinToInterrupt(SENSOR_1_PIN), pulseCounter1, FALLING);
-  attachInterrupt(digitalPinToInterrupt(SENSOR_2_PIN), pulseCounter2, FALLING);
-  attachInterrupt(digitalPinToInterrupt(SENSOR_3_PIN), pulseCounter3, FALLING);
-  
-  Serial.println("\n✓ Setup complete!");
-  Serial.println("Monitoring zones:");
-  for (int i = 0; i < 3; i++)
-  {
-    Serial.printf("  • Zone %s: %s (GPIO %d)\n", 
-                  zones[i].id.c_str(), 
-                  zones[i].name.c_str(),
-                  (i == 0) ? SENSOR_1_PIN : (i == 1) ? SENSOR_2_PIN : SENSOR_3_PIN);
+  char buffer[256];
+  serializeJson(doc, buffer);
+
+  String topic = "hydropulse/zones/" + String(alert.zoneId) + "/alerts";
+  if (mqttClient.publish(topic.c_str(), buffer)) {
+    logMsg("ALERT SENT: " + String(alert.alertType) + " on Zone " + String(alert.zoneId));
+  } else {
+    logMsg("Failed to send Alert to " + topic);
+  }
+}
+
+void publishUsage(UsageDTO usage) {
+  JsonDocument doc;
+  doc["zoneId"] = usage.zoneId;
+  doc["totalVol"] = usage.totalVolume;
+  doc["duration"] = usage.durationMs;
+  doc["status"] = usage.status;
+
+  char buffer[256];
+  serializeJson(doc, buffer);
+
+  String topic = "hydropulse/zones/" + String(usage.zoneId) + "/usage";
+  if (mqttClient.publish(topic.c_str(), buffer)) {
+    logMsg("USAGE SENT: " + String(usage.totalVolume) + "L used on Zone " + String(usage.zoneId));
+  } else {
+    logMsg("Failed to send Usage to " + topic);
+  }
+}
+
+// ==============================================================================
+// SENSORS
+// ==============================================================================
+WaterSensor sensors[3] = {
+  {"1", "Kitchen", 25, 0, 0, 0.0, false, "OFF", 0, 0, 0.0, false, 0},
+  {"2", "Guest Bath", 26, 0, 0, 0.0, false, "OFF", 0, 0, 0.0, false, 0},
+  {"3", "Master Bath", 27, 0, 0, 0.0, false, "OFF", 0, 0, 0.0, false, 0}
+};
+
+volatile unsigned long lastPulseTimeUs[3] = {0, 0, 0};
+uint8_t flowOnCandidateSeconds[3] = {0, 0, 0};
+uint8_t flowOffCandidateSeconds[3] = {0, 0, 0};
+
+void IRAM_ATTR registerPulse(uint8_t sensorIndex) {
+  unsigned long nowUs = micros();
+  unsigned long elapsedUs = nowUs - lastPulseTimeUs[sensorIndex];
+  unsigned long minPulseIntervalUs = MIN_PULSE_INTERVAL_US_BY_ZONE[sensorIndex];
+
+  // Ignore pulses that are too close together (line noise/bounce).
+  if (elapsedUs >= minPulseIntervalUs) {
+    lastPulseTimeUs[sensorIndex] = nowUs;
+    sensors[sensorIndex].pulsesThisSecond++;
+  }
+}
+
+// ISR
+void IRAM_ATTR handleInterruptSensor1() {
+  registerPulse(0);
+}
+void IRAM_ATTR handleInterruptSensor2() {
+  registerPulse(1);
+}
+void IRAM_ATTR handleInterruptSensor3() {
+  registerPulse(2);
+}
+
+// ==============================================================================
+// DISPLAY
+// ==============================================================================
+uint16_t statusColor(const String &status) {
+  if (status == "LEAK") return ST77XX_RED;
+  if (status == "WARN") return ST77XX_YELLOW;
+  if (status == "ON") return ST77XX_GREEN;
+  return COLOR_DARKGREY;
+}
+
+void initDisplay() {
+  tft.init(240, 320);
+  tft.setRotation(1); // Landscape 320x240
+  tft.setTextWrap(false);
+  tft.fillScreen(ST77XX_BLACK);
+
+  tft.fillRect(0, 0, 320, 20, ST77XX_BLUE);
+  tft.setCursor(8, 6);
+  tft.setTextColor(ST77XX_WHITE, ST77XX_BLUE);
+  tft.setTextSize(1);
+  tft.print("HydroPulse - Live Zones");
+}
+
+void updateDisplay() {
+  const int cardX = 6;
+  const int cardW = 308;
+  const int cardH = 68;
+  const int cardGap = 6;
+  const int topY = 22;
+  const uint16_t cardBg = 0x1082;
+
+  for (int i = 0; i < 3; i++) {
+    float totalVol = sensors[i].totalPulses / PULSES_PER_LITER;
+    int y = topY + (i * (cardH + cardGap));
+
+    // Redraw each card to avoid overlapping text artifacts.
+    tft.fillRoundRect(cardX, y, cardW, cardH, 6, cardBg);
+    tft.drawRoundRect(cardX, y, cardW, cardH, 6, COLOR_DARKGREY);
+
+    tft.setTextSize(1);
+    tft.setTextColor(ST77XX_WHITE, cardBg);
+    tft.setCursor(cardX + 10, y + 8);
+    tft.printf("Zone %d (%s)", i + 1, sensors[i].name.c_str());
+
+    tft.setTextColor(statusColor(sensors[i].status), cardBg);
+    tft.setCursor(cardX + 210, y + 8);
+    tft.printf("%-4s", sensors[i].status.c_str());
+
+    tft.setCursor(cardX + 10, y + 28);
+    tft.setTextColor(ST77XX_CYAN, cardBg);
+    tft.setTextSize(1);
+    tft.printf("Flow : %6.2f L/min", sensors[i].flowRateLmin);
+
+    tft.setCursor(cardX + 10, y + 46);
+    tft.setTextColor(ST77XX_WHITE, cardBg);
+    tft.printf("Total: %7.2f L", totalVol);
+  }
+}
+
+// ==============================================================================
+// WIFI + MQTT
+// ==============================================================================
+void connectWiFi() {
+  logMsg("Connecting to WiFi: " + String(WIFI_SSID));
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
   Serial.println();
+  logMsg("WiFi Connected! IP: " + WiFi.localIP().toString());
 }
 
-void loop()
-{
-  if (!client.connected())
-    reconnect();
-  client.loop();
+void connectMQTT() {
+  secureClient.setInsecure();
+  mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
 
-  if (millis() - lastMillis >= 1000)
-  {
-    Serial.println("\n─── HYDRO PULSE REPORT ───");
-    
-    for (int i = 0; i < 3; i++)
-    {
-      noInterrupts();
-      int pulsesThisSecond = zones[i].currentSecondPulses;
-      zones[i].currentSecondPulses = 0;
-      interrupts();
-      
-      zones[i].flowRateLmin = (float)pulsesThisSecond / K_FACTOR;
-
-      if (zones[i].flowRateLmin > 0.1)
-      {
-        if (!zones[i].isFlowing)
-        {
-          zones[i].isFlowing = true;
-          zones[i].flowStartTime = millis();
-        }
-        
-        unsigned long flowDuration = millis() - zones[i].flowStartTime;
-        
-        if (flowDuration > LEAK_THRESHOLD_MS)
-          zones[i].status = "LEAK DETECTED!";
-        else if (flowDuration > LONG_USAGE_MS)
-          zones[i].status = "Long Usage";
-        else
-          zones[i].status = "Running";
-      }
-      else
-      {
-        zones[i].isFlowing = false;
-        zones[i].status = "Inactive";
-      }
-
-      Serial.printf("Zone %d [%s]: %.2f L/min | %s | Total: %.2f L\n", 
-                    i + 1, 
-                    zones[i].name.c_str(), 
-                    zones[i].flowRateLmin, 
-                    zones[i].status.c_str(),
-                    (float)zones[i].totalPulses / PULSES_PER_LITER);
-
-      publishZone(zones[i]);
+  while (!mqttClient.connected()) {
+    logMsg("Attempting MQTT connection...");
+    if (mqttClient.connect("esp32", MQTT_USER, MQTT_PASSWORD)) {
+      logMsg("MQTT Connected to HiveMQ!");
+    } else {
+      logMsg("MQTT Failed, rc=" + String(mqttClient.state()) + " (retrying in 2s)");
+      delay(2000);
     }
-    
-    lastMillis = millis();
+  }
+}
+
+// ==============================================================================
+// SETUP
+// ==============================================================================
+void setup() {
+  Serial.begin(115200);
+  logMsg("--- HydroPulse System Starting ---");
+
+  initDisplay();
+  logMsg("Display Initialized");
+
+  connectWiFi();
+  connectMQTT();
+
+  mqttClient.setBufferSize(MQTT_MAX_PACKET_SIZE);
+
+  pinMode(PIN_SENSOR_1, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_2, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_3, INPUT_PULLUP);
+
+  unsigned long nowUs = micros();
+  for (int i = 0; i < 3; i++) {
+    sensors[i].pulsesThisSecond = 0;
+    sensors[i].totalPulses = 0;
+    lastPulseTimeUs[i] = nowUs;
+    flowOnCandidateSeconds[i] = 0;
+    flowOffCandidateSeconds[i] = 0;
+  }
+
+  attachInterrupt(digitalPinToInterrupt(PIN_SENSOR_1), handleInterruptSensor1, FALLING);
+  attachInterrupt(digitalPinToInterrupt(PIN_SENSOR_2), handleInterruptSensor2, FALLING);
+  attachInterrupt(digitalPinToInterrupt(PIN_SENSOR_3), handleInterruptSensor3, FALLING);
+  
+  logMsg("Sensors and Interrupts Ready");
+}
+
+// ==============================================================================
+// LOOP
+// ==============================================================================
+unsigned long lastReportTimeMs = 0;
+
+void loop() {
+  if (!mqttClient.connected()) {
+    connectMQTT();
+  }
+  mqttClient.loop();
+
+  if (millis() - lastReportTimeMs >= 1000) {
+    for (int i = 0; i < 3; i++) {
+      int rawPulses = 0;
+
+      noInterrupts();
+      rawPulses = sensors[i].pulsesThisSecond;
+      sensors[i].pulsesThisSecond = 0;
+      interrupts();
+
+      int validPulses = rawPulses;
+      if (validPulses < MIN_VALID_PULSES_PER_SECOND_BY_ZONE[i]) {
+        validPulses = 0;
+      }
+
+      sensors[i].flowRateLmin = validPulses / K_FACTOR;
+
+      if (sensors[i].flowRateLmin > MAX_VALID_FLOW_LMIN) {
+        sensors[i].flowRateLmin = 0.0;
+        validPulses = 0;
+      }
+
+      sensors[i].totalPulses += validPulses;
+      float totalVol = sensors[i].totalPulses / PULSES_PER_LITER;
+      bool aboveOnThreshold = sensors[i].flowRateLmin > FLOW_ON_THRESHOLD_LMIN;
+      bool belowOffThreshold = sensors[i].flowRateLmin < FLOW_OFF_THRESHOLD_LMIN;
+
+      if (!sensors[i].isFlowing) {
+        if (aboveOnThreshold) {
+          if (flowOnCandidateSeconds[i] < FLOW_START_CONFIRM_SECONDS) {
+            flowOnCandidateSeconds[i]++;
+          }
+        } else {
+          flowOnCandidateSeconds[i] = 0;
+        }
+
+        if (flowOnCandidateSeconds[i] >= FLOW_START_CONFIRM_SECONDS) {
+          sensors[i].flowStartTimeMs = millis();
+          sensors[i].isFlowing = true;
+          flowOnCandidateSeconds[i] = 0;
+        }
+        flowOffCandidateSeconds[i] = 0;
+
+      } else {
+        if (belowOffThreshold) {
+          if (flowOffCandidateSeconds[i] < FLOW_STOP_CONFIRM_SECONDS) {
+            flowOffCandidateSeconds[i]++;
+          }
+        } else {
+          flowOffCandidateSeconds[i] = 0;
+        }
+
+        if (flowOffCandidateSeconds[i] >= FLOW_STOP_CONFIRM_SECONDS) {
+          sensors[i].isFlowing = false;
+          flowOffCandidateSeconds[i] = 0;
+        }
+        flowOnCandidateSeconds[i] = 0;
+      }
+
+      if (sensors[i].isFlowing) {
+        unsigned long duration = millis() - sensors[i].flowStartTimeMs;
+
+        if (duration > THRESHOLD_LEAK_MS) {
+          sensors[i].status = "LEAK";
+
+          if (millis() - sensors[i].lastAlertTime > 60000) {
+            publishAlert({sensors[i].id.c_str(),"LEAK","Leak detected"});
+            sensors[i].lastAlertTime = millis();
+          }
+
+        } else if (duration > THRESHOLD_LONG_USAGE_MS) {
+          sensors[i].status = "WARN";
+        } else {
+          sensors[i].status = "ON";
+        }
+
+      } else {
+        sensors[i].status = "OFF";
+      }
+
+      bool flowing = sensors[i].status != "OFF";
+
+      if (flowing && !sensors[i].wasFlowing) {
+        sensors[i].sessionStartTimeMs = millis();
+        sensors[i].sessionStartVolume = totalVol;
+        sensors[i].wasFlowing = true;
+      }
+
+      if (!flowing && sensors[i].wasFlowing) {
+        float used = totalVol - sensors[i].sessionStartVolume;
+        unsigned long duration = millis() - sensors[i].sessionStartTimeMs;
+
+        if (used > 0.05) {
+          publishUsage({sensors[i].id.c_str(), used, duration, "DONE"});
+        }
+
+        sensors[i].wasFlowing = false;
+      }
+
+      publishTelemetry({
+        sensors[i].id.c_str(),
+        sensors[i].flowRateLmin,
+        totalVol,
+        sensors[i].status.c_str()
+      });
+    }
+
+    // Print summary to Serial for monitoring (after current sample is processed).
+    Serial.printf("[LIVE] Z1: %.2f L/m | Z2: %.2f L/m | Z3: %.2f L/m\n",
+                  sensors[0].flowRateLmin, sensors[1].flowRateLmin, sensors[2].flowRateLmin);
+
+    updateDisplay();
+    lastReportTimeMs = millis();
   }
 }

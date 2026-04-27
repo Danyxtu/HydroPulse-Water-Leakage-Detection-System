@@ -4,9 +4,8 @@ export type ZoneStatus = "Leakage" | "Inactive" | "Running";
 // types/index.ts or types.ts
 export interface Zone {
   id: string;
-  name: string;
-  zoneId: string;
-  zoneName: string;
+  zoneId?: string;
+  name?: string;
   flowRate: number;
   totalVolume: number;
   status: "Running" | "Inactive" | "Leakage";
@@ -41,6 +40,9 @@ export interface LogEntry {
   time: string;
   duration: string;
   volume: string;
+  type?: string;
+  date?: string;
+  zoneName?: string;
   timestamp?: string; // ISO format for sorting
 }
 

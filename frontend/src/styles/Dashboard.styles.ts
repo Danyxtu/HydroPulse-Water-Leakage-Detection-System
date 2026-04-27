@@ -49,6 +49,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: SIZES.padding,
     gap: 12,
   },
+  zoneHintText: {
+    marginHorizontal: SIZES.padding,
+    marginBottom: 8,
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textDark,
+    opacity: 0.68,
+  },
 
   // Enhanced Card Styles
   enhancedCard: {

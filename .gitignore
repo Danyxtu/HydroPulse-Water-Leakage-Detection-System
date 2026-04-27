@@ -28,3 +28,6 @@ yarn-error.log*
 
 IoTDocs.md
 git.txt
+cron-setup.md
+mqtt-setup.md
+backend/README.md

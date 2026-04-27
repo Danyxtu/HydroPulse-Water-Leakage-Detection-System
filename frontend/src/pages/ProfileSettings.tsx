@@ -65,7 +65,6 @@ export default function ProfileSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* --- Header --- */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -74,14 +73,13 @@ export default function ProfileSettingsScreen() {
           <ArrowLeftCircle size={32} color="#67A1EB" strokeWidth={1.5} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile & Settings</Text>
-        <View style={{ width: 32 }} /> {/* Spacer for alignment */}
+        <View style={{ width: 32 }} />
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- Profile Card --- */}
         <View style={styles.profileCard}>
           <View style={styles.avatarLarge}>
             <Text style={styles.avatarText}>P</Text>
@@ -94,7 +92,6 @@ export default function ProfileSettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* --- System & Hardware Settings --- */}
         <Text style={styles.sectionHeader}>IoT System</Text>
         <View style={styles.settingsGroup}>
           <SettingsRow
@@ -117,7 +114,6 @@ export default function ProfileSettingsScreen() {
           />
         </View>
 
-        {/* --- Account Settings --- */}
         <Text style={styles.sectionHeader}>Account</Text>
         <View style={styles.settingsGroup}>
           <SettingsRow
@@ -131,7 +127,6 @@ export default function ProfileSettingsScreen() {
           />
         </View>
 
-        {/* --- Support & Contacts --- */}
         <Text style={styles.sectionHeader}>Support</Text>
         <View style={styles.settingsGroup}>
           <SettingsRow
@@ -141,7 +136,6 @@ export default function ProfileSettingsScreen() {
           />
         </View>
 
-        {/* --- Logout --- */}
         <View style={[styles.settingsGroup, { marginTop: 24 }]}>
           <SettingsRow
             icon={<LogOut size={20} color="#EF4444" />}
