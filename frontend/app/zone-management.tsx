@@ -1,1 +1,1 @@
-export { default } from "../pages/ZoneManagement";
+export { default } from "@pages/ZoneManagement";

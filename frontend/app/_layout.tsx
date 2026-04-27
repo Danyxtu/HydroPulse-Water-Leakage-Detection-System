@@ -1,20 +1,15 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
-import { mqttService } from "../services/mqttService";
+import { MqttProvider } from "../src/context/MqttContext";
 
 export default function RootLayout() {
-  useEffect(() => {
-    // Start MQTT connection on app launch
-    mqttService.connect();
-  }, []);
-
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="activity-logs" />
-      <Stack.Screen name="usage-details" />
-      <Stack.Screen name="profile-settings" />
-      <Stack.Screen name="zone-management" />
-    </Stack>
+    <MqttProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="usage-details" />
+        <Stack.Screen name="profile-settings" />
+        <Stack.Screen name="zone-management" />
+      </Stack>
+    </MqttProvider>
   );
 }
