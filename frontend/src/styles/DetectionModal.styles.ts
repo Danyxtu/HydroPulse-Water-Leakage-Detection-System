@@ -1,5 +1,7 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { COLORS, SIZES } from "../constants/themes";
+
+const { width } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -11,146 +13,266 @@ export const styles = StyleSheet.create({
   },
   modalCard: {
     width: "100%",
+    maxHeight: "95%",
     backgroundColor: COLORS.white,
     borderRadius: SIZES.radiusMedium,
-    padding: 12,
-    paddingTop: 40,
+    overflow: "hidden",
   },
-  closeButton: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    zIndex: 10,
-  },
-  innerContainer: {
-    backgroundColor: COLORS.background,
-    borderRadius: SIZES.radiusSmall,
-    padding: 24,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
-  iconWrapper: {
-    marginBottom: 16,
-  },
-  titleText: {
+  title: {
     fontSize: 18,
     fontWeight: "bold",
     color: COLORS.textDark,
-    textAlign: "center",
-    marginBottom: 16,
   },
-  bodyText: {
-    fontSize: 13,
-    color: "#4B5563",
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 24,
+  closeButton: {
+    padding: 5,
   },
-  listContainer: {
-    width: "100%",
-    marginBottom: 24,
-    paddingHorizontal: 10,
+  content: {
+    padding: 20,
   },
-  listItem: {
-    fontSize: 13,
-    color: "#4B5563",
-    marginBottom: 6,
-  },
-  zonesList: {
-    width: "100%",
-    marginVertical: 10,
-    gap: 16,
-  },
-  zoneRow: {
+  stepIndicator: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#E5E7EB",
+    marginHorizontal: 4,
+  },
+  stepDotActive: {
+    backgroundColor: COLORS.primary,
+    width: 20,
+  },
+  
+  // Step 1 Styles
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.textDark,
+    marginBottom: 10,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 20,
+  },
+  zoneItem: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.primary,
   },
   zoneName: {
     fontSize: 15,
-    fontWeight: "bold",
     color: COLORS.textDark,
   },
-  zoneTime: {
-    fontSize: 11,
-    color: COLORS.textDark,
+
+  // Step 2 Styles
+  cautionContainer: {
+    gap: 16,
+  },
+  cautionItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFBEB",
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F59E0B",
+  },
+  cautionText: {
+    fontSize: 14,
+    color: "#92400E",
+    flex: 1,
+    lineHeight: 20,
+  },
+  cautionIcon: {
+    marginRight: 12,
     marginTop: 2,
   },
-  statusIconContainer: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
+
+  // Step 3 Styles
+  loadingContainer: {
     alignItems: "center",
-  },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     justifyContent: "center",
-    alignItems: "center",
+    paddingVertical: 40,
   },
-  warningText: {
-    fontSize: 10,
-    color: COLORS.redDark,
+  loadingText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: COLORS.textDark,
+    fontWeight: "500",
+  },
+  loadingSubtext: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#6B7280",
     textAlign: "center",
-    marginTop: 20,
+  },
+
+  // Step 4 (Summary) Styles
+  summaryContainer: {
+    alignItems: "center",
+  },
+  visualizationBox: {
+    width: "100%",
+    height: 300,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
     marginBottom: 20,
-    lineHeight: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    position: "relative",
   },
-  buttonRowRight: {
-    flexDirection: "row",
+  pathLine: {
+    position: "absolute",
+    backgroundColor: "#E5E7EB",
+    zIndex: 1,
+  },
+  pathLineActive: {
+    backgroundColor: COLORS.primary,
+    height: 3,
+  },
+  areaNode: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 3,
+    backgroundColor: "#E5E7EB",
+    borderWidth: 2,
+    borderColor: "#D1D5DB",
+  },
+  areaNodeMain: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: COLORS.primary,
+    borderColor: "#6D28D9",
+  },
+  areaNodeNormal: {
+    backgroundColor: "#10B981",
+    borderColor: "#059669",
+  },
+  areaNodeLeak: {
+    backgroundColor: "#EF4444",
+    borderColor: "#B91C1C",
+  },
+  areaNodeSelected: {
+    borderColor: COLORS.primary,
+    borderWidth: 3,
+  },
+  areaLabel: {
+    fontSize: 10,
+    color: COLORS.white,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  areaLabelMain: {
+    fontSize: 12,
+  },
+  statusCard: {
     width: "100%",
-    justifyContent: "flex-end",
-    gap: 16,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    flexDirection: "row",
     alignItems: "center",
   },
-  buttonRowSpaced: {
+  statusCardLeak: {
+    backgroundColor: "#FEE2E2",
+  },
+  statusCardNormal: {
+    backgroundColor: "#ECFDF5",
+  },
+  statusCardEmpty: {
+    backgroundColor: "#F3F4F6",
+  },
+  statusTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 12,
+  },
+  statusDesc: {
+    fontSize: 13,
+    marginLeft: 12,
+    marginTop: 2,
+  },
+
+  // Footer
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
     flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: "center",
     alignItems: "center",
   },
-  btnDisabled: {
-    backgroundColor: "#D1D5DB",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  buttonSecondary: {
+    backgroundColor: "#F3F4F6",
   },
-  btnDisabledText: {
-    color: "#9CA3AF",
-    fontWeight: "bold",
+  buttonPrimary: {
+    backgroundColor: COLORS.primary,
   },
-  btnPurpleText: {
-    color: "#6D28D9",
-    fontWeight: "bold",
-    paddingHorizontal: 10,
+  buttonText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
-  btnBlueText: {
-    color: "#3B82F6",
-    fontWeight: "bold",
+  buttonTextSecondary: {
+    color: COLORS.textDark,
   },
-  btnDisabledWideContainer: {
-    width: "100%",
-    alignItems: "flex-end",
-    marginTop: 20,
+  buttonTextPrimary: {
+    color: COLORS.white,
   },
-  btnDisabledWide: {
-    backgroundColor: "#D1D5DB",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+  
+  // Glowing animation
+  glowingContainer: {
+    position: "absolute",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(239, 68, 68, 0.4)",
+    zIndex: 2,
   },
-  btnDisabledWideText: {
-    color: "#9CA3AF",
-    fontWeight: "bold",
-  },
-  btnGreenWide: {
-    backgroundColor: "#A7F3D0",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-  },
-  btnGreenText: {
-    color: "#059669",
-    fontWeight: "bold",
-  },
+  glowingContainerGreen: {
+    position: "absolute",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(16, 185, 129, 0.4)",
+    zIndex: 2,
+  }
 });

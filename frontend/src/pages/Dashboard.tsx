@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronDown } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { PieChart } from "react-native-gifted-charts";
 import ConnectionBadge from "@components/Dashboard/ConnectionBadge";
 import ZoneModal from "../components/ZoneModal";
 
@@ -181,16 +182,31 @@ export default function Dashboard() {
     setIsZoneModalVisible(false);
   };
 
+  const chartColors = [
+    "#4A90E2",
+    "#2ECC71",
+    "#F1C40F",
+    "#E67E22",
+    "#E74C3C",
+    "#9B59B6",
+  ];
+
+  const chartData = zoneData
+    .map((zone, index) => ({
+      value: Number(zone.totalVolume) || 0,
+      color: chartColors[index % chartColors.length],
+      label: zone.name || `Zone ${zone.id}`,
+    }))
+    .filter((item) => item.value > 0);
+
+  const hasData = chartData.length > 0;
+
   return (
     <>
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* --- Header --- */}
-          <TouchableOpacity
-            style={styles.header}
-            activeOpacity={0.9}
-            onPress={() => router.push("/profile-settings")}
-          >
+          <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.avatarPlaceholder} />
               <View>
@@ -200,20 +216,19 @@ export default function Dashboard() {
                 </Text>
               </View>
             </View>
-            <ChevronDown size={24} color="#A0B2C6" />
-          </TouchableOpacity>
+          </View>
 
           {/* --- Connection Status --- */}
           <ConnectionBadge state={connectionStatus} />
 
           {/* --- Loading Indicator --- */}
-          {loading && (
+          {/* {loading && (
             <ActivityIndicator
               size="large"
               color="#4A90E2"
               style={{ marginTop: 40 }}
             />
-          )}
+          )} */}
 
           {/* --- Zone Cards (Real-time updates) --- */}
           <Text style={styles.zoneHintText}>Click the cards to view more</Text>
@@ -233,11 +248,7 @@ export default function Dashboard() {
           <UsageToggle activeTab={activeToggle} onTabChange={setActiveToggle} />
 
           {/* --- Analytics Card --- */}
-          <TouchableOpacity
-            style={styles.analyticsCard}
-            activeOpacity={0.9}
-            onPress={() => router.push("/usage-details")}
-          >
+          <View style={styles.analyticsCard}>
             <View style={styles.analyticsInfo}>
               <Text style={styles.analyticsTitle}>
                 {activeToggle}'s{"\n"}Current{"\n"}Usage
@@ -248,7 +259,31 @@ export default function Dashboard() {
                 </Text>
               </View>
             </View>
-          </TouchableOpacity>
+
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+              <PieChart
+                data={hasData ? chartData : [{ value: 1, color: "#E5E5E5" }]}
+                radius={50}
+                innerRadius={35}
+                innerCircleColor={"#FFFFFF"}
+                centerLabelComponent={() => (
+                  <View
+                    style={{ justifyContent: "center", alignItems: "center" }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 10,
+                        fontWeight: "bold",
+                        color: "#1A3B5C",
+                      }}
+                    >
+                      {activeToggle === "Today" ? "Today" : "All"}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          </View>
         </ScrollView>
 
         {/* --- Bottom Navigation --- */}
